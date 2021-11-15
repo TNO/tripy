@@ -1,0 +1,115 @@
+stages:
+  - check
+  - test
+#  - document
+
+# ......................................................................................
+# Function(s)
+# ......................................................................................
+# This function is expected to be run in a job that only builds the doc but does
+# not require the `taralli` package. See `setup.py` how the `CI_DOC` environmental
+# variable influences the install.
+
+#.build_doc: &build_doc >-
+#  export CI_DOC="Test" &&
+#  pip install -e . &&
+#  sphinx-build -b html docs public
+
+.run_test: &run_test >-
+  pip install -e .[testing] &&
+  coverage run -m pytest && coverage report -m
+
+.install_git: &install_git >-
+  apt-get update &&
+  apt-get install -y git
+
+# ......................................................................................
+# Check code format/style
+# ......................................................................................
+# For master: all checks must be passed
+check:hooks:
+  stage: check
+  image: python:3.7-slim
+  allow_failure: false
+  before_script:
+    - pip install pre-commit
+    - *install_git
+  script:
+    - pre-commit run --all-files --verbose --show-diff-on-failure
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: always
+
+# For all branches but the master the hooks/check can fail
+dev_check:hooks:
+  stage: check
+  image: python:3.7-slim
+  allow_failure: true
+  before_script:
+    - pip install pre-commit
+    - *install_git
+  script:
+    - pre-commit run --all-files --verbose --show-diff-on-failure
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: always
+
+# ......................................................................................
+# Unit and integration tests
+## ......................................................................................
+#test:3.6:
+#  stage: test
+#  image: python:3.6-slim
+#  script:
+#    - *run_test
+#  coverage: /TOTAL\s+\d+\s+\d+\s+(\d+%)/
+
+test:3.7:
+  stage: test
+  image: python:3.7-slim
+  script:
+    - *run_test
+  coverage: /TOTAL\s+\d+\s+\d+\s+(\d+%)/
+
+#test:3.8:
+#  stage: test
+#  image: python:3.8-slim
+#  script:
+#    - *run_test
+#  coverage: /TOTAL\s+\d+\s+\d+\s+(\d+%)/
+
+# ......................................................................................
+# Documentation build
+# ......................................................................................
+# Documentation build for the master
+
+#pages:
+#  stage: document
+#  image: python:3.7-slim
+#  script:
+#    - *build_doc
+#  artifacts:
+#    paths:
+#      - public
+#  rules:
+#    - if: '$CI_COMMIT_BRANCH == "master"'
+#      when: always
+#
+## Documentation build for all branches but the master; based on:
+## https://stackoverflow.com/a/58402821/4063376
+#dev_pages:
+#    stage: document
+#    image: python:3.7-slim
+#    variables:
+#      PUBLIC_URL: "/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/public"
+#    script:
+#      - *build_doc
+#    artifacts:
+#        paths:
+#        - public
+#    environment:
+#        name: "$CI_COMMIT_BRANCH"
+#        url: "https://$CI_PROJECT_NAMESPACE.gitlab.io/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/public/index.html"
+#    rules:
+#    - if: '$CI_COMMIT_BRANCH != "master"'
+#      when: always
