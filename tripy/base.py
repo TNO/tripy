@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.lib.recfunctions import stack_arrays
 from tabulate import tabulate
+
 from tripy.kernels import kernel
 from tripy.utils import correlation_matrix, grow_mx
 
