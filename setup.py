@@ -71,5 +71,16 @@ setuptools.setup(
     ],
     # package_dir={"": "tripy"},
     packages=setuptools.find_packages(),
+    install_requires=install_requires,
+    # additional packages for development (additional to `install_requires`)
+    extras_require={
+        "development": [
+            *doc_requires,
+            *test_requires,
+            *packaging_requires,
+            *format_requires,
+        ],
+        "testing": test_requires,
+    },
     python_requires=">=3.6",
 )

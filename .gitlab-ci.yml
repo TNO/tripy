@@ -16,7 +16,7 @@ stages:
 #  sphinx-build -b html docs public
 
 .run_test: &run_test >-
-  pip install -e . &&
+  pip install -e .[testing] &&
   coverage run -m pytest && coverage report -m
 
 .install_git: &install_git >-
