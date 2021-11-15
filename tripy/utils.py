@@ -2,7 +2,6 @@
  Utility functions for the log-likelihood builder module.
 """
 from itertools import product
-from timeit import default_timer as timer
 from typing import Callable, Tuple, Union
 
 import numpy as np
@@ -568,7 +567,8 @@ def kron_sample_2D(
     S = np.random.default_rng().normal(loc=0.0, scale=std_noise, size=(size, Nx * Nt))
 
     # Solve for Z
-    solve_func = lambda A, B: solve_lin_bidiag_mrhs(A[0], A[1], B, side="U")
+    def solve_func(A, B):
+        return solve_lin_bidiag_mrhs(A[0], A[1], B, side="U")
 
     Z = np.zeros((size, (Nx * Nt)))
     for i in prange(size):
@@ -598,7 +598,6 @@ def kron_sample_ND(coords, std_noise, std_model, lcorr, y_model=None, size=1):
     # lcorr: Vector of size ND
     # y_model: Array of size [N1 x N2 x ... x ND]
 
-    ND = len(coords)
     Ni = []
     L = []
     for idx_N, coords_i in enumerate(coords):
@@ -615,7 +614,9 @@ def kron_sample_ND(coords, std_noise, std_model, lcorr, y_model=None, size=1):
     S = np.random.default_rng().normal(loc=0.0, scale=std_noise, size=(size, Npts))
 
     # Solve for Z across all dimensions
-    solve_func = lambda A, B: solve_lin_bidiag_mrhs(A[0], A[1], B, side="U")
+    def solve_func(A, B):
+        return solve_lin_bidiag_mrhs(A[0], A[1], B, side="U")
+
     Z = np.zeros((size, Npts))
     for i in prange(size):
         Z[i, :] = kron_op(L, X[i, :], solve_func)

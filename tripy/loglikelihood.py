@@ -16,7 +16,6 @@ from utils import (
     chol_tridiag,
     inv_cov_vec_1D,
     kron_op,
-    solve_lin_bidiag_mrhs,
     symm_tri_block_chol,
     symm_tri_block_solve,
 )
@@ -49,7 +48,9 @@ class LogLikelihood:
     """
 
     def __init__(
-        self, MS: MeasurementSpaceTimePoints, method: Optional[str] = None,
+        self,
+        MS: MeasurementSpaceTimePoints,
+        method: Optional[str] = None,
     ):
         self.MS = MS
         self.measurement_space_points = MS.measurement_space_points

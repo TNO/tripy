@@ -1,3 +1,5 @@
+import os
+
 import setuptools
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -14,7 +16,7 @@ user_requires = [
     "tabulate<1",
     "tqdm<5",
     "numba<1",
-    "torch<2"
+    "torch<2",
 ]
 doc_requires = [
     "six",
@@ -41,13 +43,21 @@ format_requires = [
     "flake8-import-order",
 ]
 
+# In order to reduce the time to build the documentation
+# https://github.com/readthedocs/readthedocs.org/issues/5512#issuecomment-475073310
+on_ci_doc = os.environ.get("CI_DOC") is not None
+if on_ci_doc:
+    install_requires = doc_requires
+else:
+    install_requires = user_requires
 
 setuptools.setup(
     name="tripy",
     version="0.0.1",
     author="Ioannis Koune",
     author_email="ioannis.koune@tno.nl",
-    description="A package for efficient loglikelihood evaluation with structured covariance matrices",
+    description="A package for efficient loglikelihood evaluation with"
+    " structured covariance matrices",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/pypa/sampleproject",
@@ -59,7 +69,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    #package_dir={"": "tripy"},
+    # package_dir={"": "tripy"},
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
 )
