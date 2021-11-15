@@ -6,20 +6,19 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 import torch
+from base import MeasurementSpaceTimePoints
 from scipy.linalg import eigh, eigh_tridiagonal
 from scipy.linalg.blas import dgemm, dsyrk, dtrsm
 from scipy.linalg.lapack import dpotrf
 from torch.distributions import MultivariateNormal
-
-from base import MeasurementSpaceTimePoints
 from utils import (
     cho_solve_symm_tridiag,
     chol_tridiag,
     inv_cov_vec_1D,
-    kron_mvm,
+    kron_op,
+    solve_lin_bidiag_mrhs,
     symm_tri_block_chol,
     symm_tri_block_solve,
-    solve_lin_bidiag_mrhs
 )
 
 
@@ -50,9 +49,7 @@ class LogLikelihood:
     """
 
     def __init__(
-        self,
-        MS: MeasurementSpaceTimePoints,
-        method: Optional[str] = None,
+        self, MS: MeasurementSpaceTimePoints, method: Optional[str] = None,
     ):
         self.MS = MS
         self.measurement_space_points = MS.measurement_space_points
@@ -702,9 +699,9 @@ def kron_loglike_ND_tridiag(
     logdet_C = np.sum(np.log(C))
 
     # Kronecker mvm. Note that eigenvec(A) = eigenvec(A^-1)
-    a = kron_mvm(w_d, y, transa=True)
+    a = kron_op(w_d, y, transa=True)
     a = a * 1 / C
-    a = kron_mvm(w_d, a)
+    a = kron_op(w_d, a)
     ySy = np.sum(y * a)
 
     # Loglikelihood
@@ -757,42 +754,6 @@ def chol_loglike_1D(
 
     # Return loglikelihood
     return -0.5 * (logdet_Sigma + ySigmay + Nx * np.log(2 * np.pi))
-
-
-def chol_sample_1D(coords, std_noise, std_model, lcorr, y_model = None, size = 1):
-    """
-
-    Args:
-        coords:
-        std_noise:
-        std_model:
-        lcorr:
-        y_model:
-        size:
-
-    Returns:
-
-    """
-
-    N = len(coords)
-
-    # Sample from std. normal and Gaussian with vector noise
-    X = np.random.default_rng().normal(loc = 0.0, scale = 1.0, size = (size, N))
-    S = np.random.default_rng().normal(loc = 0.0, scale = std_noise, size = (size, N))
-
-    # Cholesky of inverse correlation matrix
-    d0, d1 = inv_cov_vec_1D(coords, lcorr, std_model)
-    l0, l1 = chol_tridiag(d0, d1)
-
-    # Solve linear bidiagonal system
-    Z = solve_lin_bidiag_mrhs(l0, l1, X.T, side = "U")
-
-    # Scale by model output
-    if y_model is not None:
-        Z = y_model * Z.T
-
-    # Sum the samples
-    return Z + S
 
 
 if __name__ == "__main__":

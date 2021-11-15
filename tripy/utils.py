@@ -2,15 +2,15 @@
  Utility functions for the log-likelihood builder module.
 """
 from itertools import product
+from timeit import default_timer as timer
 from typing import Callable, Tuple, Union
 
 import numpy as np
-from numba import jit
+from numba import jit, prange
 from scipy.linalg.blas import dgemm, dsyrk, dtrsm
 from scipy.linalg.lapack import dpotrf, dpttrf
 from scipy.spatial.distance import pdist, squareform
 
-from timeit import default_timer as timer
 
 def correlation_matrix(
     x_mx,
@@ -109,38 +109,7 @@ def grow_mx(seed_mx: np.ndarray, growth_scale: int) -> np.ndarray:
     return grown_mx
 
 
-@jit(nopython=True)
-def TDMAsolver(a, b, c, d):
-    """
-    TDMA solver, a b c d can be NumPy array type or Python list type.
-    refer to http://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
-    and to
-    http://www.cfd-online.com/Wiki/Tridiagonal_matrix_algorithm_-_TDMA_(Thomas_algorithm)
-
-    Modified to also return the log determinant of the coefficient matrix
-    using the LU decomposition step.
-    """
-    nf = len(d)  # number of equations
-    ac = np.copy(a)
-    bc = np.copy(b)
-    cc = np.copy(c)
-    dc = np.copy(d)
-
-    for it in range(1, nf):
-        mc = ac[it - 1] / bc[it - 1]
-        bc[it] = bc[it] - mc * cc[it - 1]
-        dc[it] = dc[it] - mc * dc[it - 1]
-
-    # ldet = np.sum(np.log(bc))
-    xc = bc
-    xc[-1] = dc[-1] / bc[-1]
-
-    for il in range(nf - 2, -1, -1):
-        xc[il] = (dc[il] - cc[il] * xc[il + 1]) / bc[il]
-
-    return xc  # , ldet
-
-#@jit(nopython=True)
+# @jit(nopython=True)
 def symm_tri_block_chol(Cx, Ct, vec_diag, y=None):
     """
     Block Cholesky decomposition for symmetric block tridiagonal matrices
@@ -183,8 +152,7 @@ def symm_tri_block_chol(Cx, Ct, vec_diag, y=None):
 
     # Cholesky of space covariance matrix
     Li = dpotrf(Dd0 * Ct[0][0] + np.diag(GWG[0]), lower=1, clean=1, overwrite_a=0)[0]
-    #Li = np.linalg.cholesky(Dd0 * Ct[0][0] + np.diag(GWG[0]))
-
+    # Li = np.linalg.cholesky(Dd0 * Ct[0][0] + np.diag(GWG[0]))
 
     # Loop over blocks
     L = []
@@ -318,25 +286,31 @@ def inv_cov_vec_1D(
     return C_0, C_1
 
 
-def kron_mvm(
-    A: list,
-    b: np.ndarray,
-    mvm_func: Callable = np.matmul,
-    transA=False,
+def kron_op(
+    A: list, b: np.ndarray, op_func: Callable = np.matmul, transA=False
 ) -> np.ndarray:
     """
-    Efficient matrix vector multiplication for Kronecker product matrices
+    Efficient matrix-vector product or LSoE solve for Kronecker matrices
 
-    Evaluate the product x = Ab where A is the Kronecker product of N matrices
-    A = kron(AD, ..., A2, A1) by a vector b. The complexity of this operation is
-    (in theory) O(DN^[(D+1)/D]).
+    The operation carried out by this function depends on the supplied `op_func`:
+
+    * If `op_func` is a function for matrix-vector multiplication:
+    Evaluate the product x = Ab
+
+    * If `op_func` is a function for solving linear systems:
+    Solve the linear system Ax = b
+
+    where A is the Kronecker product of D matrices A = kron(AD, ..., A2, A1).
+    The complexity of the opration depends on the supplied `op_func` and the types
+    of matrices involved. For matrix-vector multiplication in the general case
+    the theoretical complexity is  O(DN^[(D+1)/D]).
+
+    Based on [1] and extended to solve linear systems.
 
     Args:
         A: List of D arrays where D is the number of dimensions.
         b: Vector of size N
-        mvm_func: Callable function that performs the matrix vector
-        multiplications. First argument must be a matrix and second
-        a vector.
+        op_func: Callable function with call signature `op_func(A, X)`
         transA: Optional, transpose the arrays in A
 
     Returns:
@@ -351,15 +325,16 @@ def kron_mvm(
         * The performance impact of the loop should be negligible, since the
         number of dimensions will be =< 4. Numba could be used to improve
         performance if necessary
+        * TODO: Add a mvm_func for the case of diagonal A matrices.
     """
     N = len(b)
     for Ai in A:
         Gd = np.shape(Ai[0])[0]
         X = np.reshape(b, (Gd, int(N / Gd)))
         if transA:
-            Z = mvm_func(Ai.T, X)
+            Z = op_func(Ai.T, X)
         else:
-            Z = mvm_func(Ai, X)
+            Z = op_func(Ai, X)
         b = Z.T.ravel(order="C")
     return b.ravel(order="C")
 
@@ -412,7 +387,7 @@ def solve_lin_bidiag_mrhs(d0, d1, B, side="L"):
     X = np.zeros((N, n_rhs))
 
     for i in range(n_rhs):
-        X[:, i] = solve_lin_bidiag(d0, d1, B[:, i], side = side)
+        X[:, i] = solve_lin_bidiag(d0, d1, B[:, i], side=side)
     return X
 
 
@@ -493,7 +468,7 @@ def bidiag_mvm(d0, d1, b, side="L"):
     return res
 
 
-def bidiag_mmm(A, B, side = "L"):
+def bidiag_mmm(A, B, side="L"):
     """
     Matrix matrix mutliplication A * B where A is bidiagonal
 
@@ -530,9 +505,166 @@ def symtri_mvm(d0, d1, b):
     return res
 
 
+def chol_sample_1D(coords, std_noise, std_model, lcorr, y_model=None, size=1):
+    """
+
+    Args:
+        coords:
+        std_noise:
+        std_model:
+        lcorr:
+        y_model:
+        size:
+
+    Returns:
+
+    """
+
+    N = len(coords)
+
+    # Sample from std. normal and Gaussian with vector noise
+    X = np.random.default_rng().normal(loc=0.0, scale=1.0, size=(size, N))
+    S = np.random.default_rng().normal(loc=0.0, scale=std_noise, size=(size, N))
+
+    # Cholesky of inverse correlation matrix
+    d0, d1 = inv_cov_vec_1D(coords, lcorr, std_model)
+    l0, l1 = chol_tridiag(d0, d1)
+
+    # Solve linear bidiagonal system
+    Z = solve_lin_bidiag_mrhs(l0, l1, X.T, side="U")
+
+    # Scale by model output
+    if y_model is not None:
+        Z = y_model * Z.T
+
+    # Sum the samples
+    return Z + S
+
+
+def kron_sample_2D(
+    coords_x,
+    coords_t,
+    std_noise,
+    std_model_x,
+    std_model_t,
+    lcorr_x,
+    lcorr_t,
+    y_model=None,
+    size=1,
+):
+
+    # Get size of field
+    Nx = len(coords_x)
+    Nt = len(coords_t)
+
+    # Get diagonals and off-diagonals and factorize
+    d0_x, d1_x = inv_cov_vec_1D(coords_x, lcorr_x, std_model_x)
+    d0_t, d1_t = inv_cov_vec_1D(coords_t, lcorr_t, std_model_t)
+    Lx = chol_tridiag(d0_x, d1_x)
+    Lt = chol_tridiag(d0_t, d1_t)
+
+    # Sample from std. normal and Gaussian with vector noise
+    X = np.random.default_rng().normal(loc=0.0, scale=1.0, size=(size, Nx * Nt))
+    S = np.random.default_rng().normal(loc=0.0, scale=std_noise, size=(size, Nx * Nt))
+
+    # Solve for Z
+    solve_func = lambda A, B: solve_lin_bidiag_mrhs(A[0], A[1], B, side="U")
+
+    Z = np.zeros((size, (Nx * Nt)))
+    for i in prange(size):
+        Z[i, :] = kron_op([Lx, Lt], X[i, :], solve_func)
+
+    # Scale by model output
+    if y_model is not None:
+        Z = np.ravel(y_model) * Z
+
+    # Sum the samples
+    return Z + S
+
+
+def kron_sample_ND(coords, std_noise, std_model, lcorr, y_model=None, size=1):
+    """
+    :param coords:
+    :param std_noise:
+    :param std_model:
+    :param lcorr:
+    :param y_model:
+    :param size:
+    :return:
+    """
+    # coords: List of ND vectors
+    # std_noise: Vector of size prod(ND)
+    # std_model: List of ND vectors
+    # lcorr: Vector of size ND
+    # y_model: Array of size [N1 x N2 x ... x ND]
+
+    ND = len(coords)
+    Ni = []
+    L = []
+    for idx_N, coords_i in enumerate(coords):
+        Ni.append(len(coords_i))
+        d0_i, d1_i = inv_cov_vec_1D(coords_i, lcorr[idx_N], std_model[idx_N])
+        Li = chol_tridiag(d0_i, d1_i)
+        L.append(Li)
+
+    # Number of points
+    Npts = np.prod(Ni)
+
+    # Sample from std. normal and Gaussian with vector noise
+    X = np.random.default_rng().normal(loc=0.0, scale=1.0, size=(size, Npts))
+    S = np.random.default_rng().normal(loc=0.0, scale=std_noise, size=(size, Npts))
+
+    # Solve for Z across all dimensions
+    solve_func = lambda A, B: solve_lin_bidiag_mrhs(A[0], A[1], B, side="U")
+    Z = np.zeros((size, Npts))
+    for i in prange(size):
+        Z[i, :] = kron_op(L, X[i, :], solve_func)
+
+    # Scale by model output
+    # TODO: Check that ravel order matches `kron_op`
+    if y_model is not None:
+        Z = np.ravel(y_model, order="C") * Z
+
+    # Sum the samples
+    return Z + S
+
+
 def get_block_by_index(A, idx_i, idx_j, Nx):
     """
     Get block (idx_i, idx_j) from block matrix A with Nt square blocks of size Nx
     along each dimension
     """
     return A[idx_i * Nx : (idx_i + 1) * Nx, idx_j * Nx : (idx_j + 1) * Nx]
+
+
+def mult_along_axis(A, B, axis):
+    """
+    Element-wise multiplication of A and B along the given axis of A
+
+    From: https://stackoverflow.com/questions/
+    30031828/multiply-numpy-ndarray-with-1d-array-along-a-given-axis
+
+    Args:
+        A:
+        B:
+        axis:
+
+    Returns:
+
+    """
+
+    A = np.array(A)
+    B = np.array(B)
+
+    if axis >= A.ndim:
+        raise np.AxisError(axis, A.ndim)
+    if A.shape[axis] != B.size:
+        raise ValueError(
+            "Length of 'A' along the given axis must be the same as B.size"
+        )
+
+    shape = np.swapaxes(A, A.ndim - 1, axis).shape
+    B_brc = np.broadcast_to(B, shape)
+    B_brc = np.swapaxes(B_brc, A.ndim - 1, axis)
+
+    return A * B_brc

@@ -34,8 +34,8 @@ import numpy as np
 from numpy.lib.recfunctions import stack_arrays
 from tabulate import tabulate
 
-from kernels import kernel
-from utils import correlation_matrix, grow_mx
+from tripy.kernels import kernel
+from tripy.utils import correlation_matrix, grow_mx
 
 
 class MeasurementSpaceTimePoints:
@@ -186,16 +186,14 @@ class MeasurementSpaceTimePoints:
         # Check input
         # ..............................................................................
         self._check_time_point_input_consistency(
-            coord_vec=coord_vec,
-            group=group,
+            coord_vec=coord_vec, group=group,
         )
 
         # ..............................................................................
         # Pre-process input -> bring into a fixed format (input is flexible)
         # ..............................................................................
         new_measurement_time_points = self._pre_process_time_point_input(
-            coord_vec=coord_vec,
-            group=group,
+            coord_vec=coord_vec, group=group,
         )
 
         # ..............................................................................
@@ -622,9 +620,7 @@ class MeasurementSpaceTimePoints:
         return measurement_space_points
 
     def _pre_process_time_point_input(
-        self,
-        coord_vec: Union[np.ndarray, Iterable, float, int],
-        group: str,
+        self, coord_vec: Union[np.ndarray, Iterable, float, int], group: str,
     ) -> np.recarray:
 
         coord_vec = np.atleast_1d(coord_vec)
@@ -657,8 +653,7 @@ class MeasurementSpaceTimePoints:
         group = np.tile(group, n_point)
 
         measurement_time_points = np.core.records.fromarrays(
-            arrayList=[group, coord_vec],
-            names="group, coord_t",
+            arrayList=[group, coord_vec], names="group, coord_t",
         )
         return measurement_time_points
 
@@ -716,8 +711,7 @@ class MeasurementSpaceTimePoints:
 
     @staticmethod
     def _check_time_point_input_consistency(
-        coord_vec: Union[np.ndarray, Iterable, float, int],
-        group: str,
+        coord_vec: Union[np.ndarray, Iterable, float, int], group: str,
     ) -> None:
 
         # Bring input shape into a desirable format: numpy arrays
