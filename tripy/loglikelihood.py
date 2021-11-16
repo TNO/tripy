@@ -6,12 +6,13 @@ from typing import Callable, List, Optional, Union
 
 import numpy as np
 import torch
-from base import MeasurementSpaceTimePoints
 from scipy.linalg import eigh, eigh_tridiagonal
 from scipy.linalg.blas import dgemm, dsyrk, dtrsm
 from scipy.linalg.lapack import dpotrf
 from torch.distributions import MultivariateNormal
-from utils import (
+
+from tripy.base import MeasurementSpaceTimePoints
+from tripy.utils import (
     cho_solve_symm_tridiag,
     chol_tridiag,
     inv_cov_vec_1D,
