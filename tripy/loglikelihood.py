@@ -111,17 +111,13 @@ class LogLikelihood:
             )
 
         # ..................................................................................
-        # Pre-process
-        # ..................................................................................
-        theta = np.atleast_2d(theta)
-
-        # ..................................................................................
         # General case
         #
         # When defaulting to the general implementation pre-processing is handled
         # by log_likelihood_linear_normal.
         # ..................................................................................
         if method == "general":
+            theta = np.atleast_2d(theta)
             if k_cov_mx is not None:
                 return log_likelihood_linear_normal(
                     theta, x_meas, physical_model, k_cov_mx, e_cov_vec
@@ -725,6 +721,17 @@ def chol_loglike_1D(
     Linear time solution for 1D (e.g. timeseries) observations with gaussian
     i.i.d. white noise and multiplicative modeling uncertainty with exponential
     correlation.
+
+    Args:
+        coord_x: [N, ] vector of coordinates
+        x_model: [N, ] vector of model predictions
+        x_meas: [N, ] vector of measurements
+        l_corr: Scalar correlation length
+        std_model: [N, ] vector of model prediction uncertainty coefficient
+        of variation
+        std_meas: [N, ] vector of measurement uncertainty std. dev.
+
+    Returns:
     """
 
     # Initialization
