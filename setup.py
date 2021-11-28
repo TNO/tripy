@@ -52,18 +52,15 @@ else:
     install_requires = user_requires
 
 setuptools.setup(
-    name="tripy",
-    version="0.0.1",
+    name="tri-py",
+    version="0.0.2",
     author="Ioannis Koune",
-    author_email="ioannis.koune@tno.nl",
+    author_email="G.Koune@gmail.com",
     description="A package for efficient loglikelihood evaluation with"
     " structured covariance matrices",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
-    project_urls={
-        "Bug Tracker": "https://github.com/pypa/sampleproject/issues",
-    },
+    url="https://gitlab.com/GKoune/tripy",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
