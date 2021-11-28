@@ -76,6 +76,7 @@ setuptools.setup(
             *format_requires,
         ],
         "testing": test_requires,
+        "docs": doc_requires,
     },
     python_requires=">=3.6",
 )
