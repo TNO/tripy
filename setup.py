@@ -20,13 +20,11 @@ user_requires = [
 ]
 doc_requires = [
     "six",
-    "sphinx>=3.0.1,<4",
+    "sphinx<5",
     "sphinx-copybutton<1",
-    "sphinxcontrib-mermaid!=0.6.1,<1",
     "sphinx-inline-tabs",
     "sphinxcontrib-bibtex<3",
     "myst-parser<1",
-    "furo",
 ]
 test_requires = [
     "pytest",
