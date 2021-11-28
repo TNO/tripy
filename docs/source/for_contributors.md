@@ -1,2 +1,2 @@
 (sec:for_contributors)=
-# For contributos
+# For contributors
