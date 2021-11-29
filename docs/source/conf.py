@@ -14,6 +14,8 @@ import datetime
 import os
 import sys
 
+from tripy import __version__
+
 sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -25,7 +27,7 @@ copyright = f"{now.year}, TNO"
 author = "Ioannis Koune"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.2"
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------

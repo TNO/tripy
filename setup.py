@@ -2,6 +2,8 @@ import os
 
 import setuptools
 
+from tripy import __version__
+
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
@@ -53,7 +55,7 @@ else:
 
 setuptools.setup(
     name="tri-py",
-    version="0.0.2",
+    version=__version__,
     author="Ioannis Koune",
     author_email="G.Koune@gmail.com",
     description="A package for efficient loglikelihood evaluation with"
