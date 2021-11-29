@@ -1,4 +1,3 @@
-"""This module helps to build likelihood functions.
-* complex covariance matrices;
-* common log-likelihood function;
-* efficient log-likelihood evaluation."""
+# Version number changed automatically using python-semantic-release
+
+__version__ = "0.1.0"
