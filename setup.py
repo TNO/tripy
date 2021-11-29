@@ -2,8 +2,6 @@ import os
 
 import setuptools
 
-from tripy import __version__
-
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
@@ -44,6 +42,9 @@ format_requires = [
     "flake8-tidy-imports",
     "flake8-import-order",
 ]
+
+# Version number changed automatically using python-semantic-release
+__version__ = "0.1.0"
 
 # In order to reduce the time to build the documentation
 # https://github.com/readthedocs/readthedocs.org/issues/5512#issuecomment-475073310

@@ -6,6 +6,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.semantic_release]
-version_variable = ["tripy/__init__.py:__version__"]
+version_variable = [
+"tripy/__init__.py:__version__",
+"setup.py:__version__"
+]
 hvcs = "gitlab"
 major_on_zero = false
