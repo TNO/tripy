@@ -25,6 +25,8 @@ doc_requires = [
     "sphinx-inline-tabs",
     "sphinxcontrib-bibtex<3",
     "myst-parser<1",
+    "sphinx-rtd-theme<2",
+    "sphinx-rtd-dark-model<2",
 ]
 test_requires = [
     "pytest",
