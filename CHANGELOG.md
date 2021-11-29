@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.0 (2021-11-29)
+### Feature
+* Added pypirc to gitignore ([`d82c786`](https://gitlab.com/GKoune/tripy/-/commit/d82c786b69f14fba2a65749b173eff3bf2913606))
+
+### Fix
+* Setup.py not reading version number when using semantic versioning ([`60ed4a3`](https://gitlab.com/GKoune/tripy/-/commit/60ed4a3b943bd8d15475945fb366540131f4c240))
+
 ## v0.1.0 (2021-11-29)
 ### Feature
 * Setting up semantic versioning ([`b864d1b`](https://gitlab.com/GKoune/tripy/-/commit/b864d1b518b86a744b67c5cb8b1e87c710068ada))

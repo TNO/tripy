@@ -44,7 +44,7 @@ format_requires = [
 ]
 
 # Version number changed automatically using python-semantic-release
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # In order to reduce the time to build the documentation
 # https://github.com/readthedocs/readthedocs.org/issues/5512#issuecomment-475073310
