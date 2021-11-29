@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2021-11-29)
+
+
 ## v0.2.0 (2021-11-29)
 ### Feature
 * Added pypirc to gitignore ([`d82c786`](https://gitlab.com/GKoune/tripy/-/commit/d82c786b69f14fba2a65749b173eff3bf2913606))
