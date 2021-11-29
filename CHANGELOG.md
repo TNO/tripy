@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.2 (2021-11-29)
+### Fix
+* Fixed typo in setup.py ([`d75ead0`](https://gitlab.com/GKoune/tripy/-/commit/d75ead086f6425dde596506c971c2dab7d652d25))
+
 ## v0.2.1 (2021-11-29)
 
 
