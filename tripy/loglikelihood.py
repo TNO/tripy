@@ -140,7 +140,7 @@ def log_likelihood_linear_normal(
             `shape [1, K].
         x_meas: measurements in a [T, S] shape. T corresponds to the time space and S
             to the physical and quantity space.
-        physical_model: function that takes as input theta and gives out x_model.
+        physical_model: function that takes as input theta and gives out y_model.
         k_cov_mx: covariance matrix of `K`, shape [T*S, T*S].
         e_cov_mx: covariance matrix of `elastic_mod`, shape [T*S, T*S].
 
@@ -361,27 +361,30 @@ def kron_loglike_ND_tridiag(
 
 def chol_loglike_1D(
     coord_x: np.ndarray,
-    x_model: np.ndarray,
-    x_meas: np.ndarray,
+    y_model: np.ndarray,
+    y_res: np.ndarray,
     l_corr: Union[int, float],
     std_model: np.ndarray,
     std_meas: np.ndarray,
 ) -> float:
     """
-    Efficient Gaussian loglikelihood for 1D problems with multiplicative
-    exponential covariance.
+    Efficient Gaussian loglikelihood for 1D problems with exponential correlation.
 
-    Linear time solution for 1D (e.g. timeseries) observations with gaussian
-    i.i.d. white noise and multiplicative modeling uncertainty with exponential
-    correlation.
+    Linear time solution for 1D (e.g. timeseries) observations with additive
+    Gaussian noise and exponential model prediction uncertainty. The model
+    prediction uncertainty can be multiplicative or additive.
 
     Args:
         coord_x: [N, ] vector of coordinates
-        x_model: [N, ] vector of model predictions
-        x_meas: [N, ] vector of measurements
+        y_model: [N, ] vector of model predictions in the case of multiplicative
+        model prediction uncertainty or vector of ones in the case of additive model
+        prediction uncertainty.
+        y_res: [N, ] vector of residuals between measurement and model prediction.
         l_corr: Scalar correlation length
         std_model: [N, ] vector of model prediction uncertainty coefficient
-        of variation
+        of variation in case of multiplicative model prediction uncertainty,
+        or vector of std. devs. for additive in the case of additive model
+        prediction uncertainty.
         std_meas: [N, ] vector of measurement uncertainty std. dev.
 
     Returns:
@@ -395,9 +398,9 @@ def chol_loglike_1D(
 
     # Assemble terms of Eqs 50 - 52
     W = 1 / (np.ones(Nx) * std_meas ** 2)  # Inverse noise vector
-    yWy = np.sum(x_meas ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
-    GWG = x_model ** 2 * (1 / std_meas ** 2)
-    Wyx = W * x_model * x_meas
+    yWy = np.sum(y_res ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
+    GWG = y_model ** 2 * (1 / std_meas ** 2)
+    Wyx = W * y_model * y_res
     d0_yWy = d0 + GWG
 
     # Factorize symmetric tridiagonal matrices
