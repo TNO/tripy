@@ -20,46 +20,38 @@ from tripy.utils import (
 )
 
 
-def chol_loglike_2D(y_res, y_model, Cx, Ct, std_meas):
+def chol_loglike_2D(
+    y_res: np.ndarray,
+    y_model: np.ndarray,
+    Cx: Union[np.ndarray, List],
+    Ct: List,
+    std_meas: np.ndarray,
+) -> float:
     """
+    Efficient 2D loglikelihood using block Cholesky decomposition.
+
     Given the uncertainty parameters and vectors of the x and t positions
     on a lattice, calculates the loglikelihood of the 2D Gaussian process
-    with multiplicative space and time uncertainties and i.i.d. noise.
+    with multiplicative space and time uncertainties and i.i.d. noise. It
+    is intended that this function is general and works with any combination
+    of spatial and temporal covariance, with only the following restrictions:
+        - Space and time are separable (Kronecker structure)
+        - Correlation in time is exponential
 
     TODO :
-        * Find a way to replace DPOTRF with DPTTRF in the Cholesky decomposition
-            to take advantage of tridiagonality
         * Add some basic input checks
-        * It is intended that this function is general and works with any combination
-            of spatial and temporal covariance, with only the following restrictions:
-                - Space and time are separable (Kronecker structure)
-                - Correlation in time is exponential
-            If possible, this function should be unaware of the types of kernels passed
-            and call methods of the kernel class (e.g. kernel.inv, kernel.chol...)
-            and the rest will be handled by the kernel. This would allow for taking
-            advantage of kernel-specific optimizations without overcomplicating this
-            function.
-        * Implement the following methods for the kernels (when more efficient than
-        the general case):
-            - inv
-            - inv_chol (with option of adding a diagonal vector)
-            - inv_eig
 
-    INPUT:
-        y_res: [Nx, Nt] Array of residuals
-        y_model: [Nx, Nt] Array of model output
-        x, t: [1, Nx], [1, Nt] Space and time point vectors
-        lcorr: Space and time correlation lengthscale
-        std: Standard deviation
-        chol: Callable
+    Args:
+        y_res: [Nx, Nt] Array of residuals.
+        y_model: [Nx, Nt] Array of model output.
+        Cx: List of diagonal and off diagonal or full inverse of spatial
+            correlation matrix.
+        Ct: List of iagonal and off-diagonal of inverse of Exponential temporal
+         correlation matrix.
+        std_meas: Std. dev. of the measurement uncertainty.
 
-    OPTIONAL:
-        check_finite: Optional flag of scipy.linalg.eigh_tridiagonal. False improves
-        performance
-
-    RETURNS:
-        L: Loglikelihood assuming exponential covariance and multiplicative
-        modeling uncertainty
+    Returns:
+        L: Loglikelihood.
     """
 
     # Check if Cx and Ct are lists or numpy arrays.
@@ -83,8 +75,6 @@ def chol_loglike_2D(y_res, y_model, Cx, Ct, std_meas):
     L, C = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y_model)
 
     # Get diagonal elements of L
-    # TODO: This will have to be modified to extract the diagonal in both the case that
-    #   the inverse of cov_mx_x is tridiagonal and in the general case.
     Ldiag = np.diagonal(L, axis1=1, axis2=2)
 
     # Vectors to be used later
@@ -189,30 +179,41 @@ def log_likelihood_linear_normal(
 
 
 def kron_loglike_2D_tridiag(
-    y, x, t, std_meas, l_corr_x, std_x, l_corr_t, std_t, check_finite=False
-):
+    y: np.ndarray,
+    x: np.ndarray,
+    t: np.ndarray,
+    std_meas: np.ndarray,
+    l_corr_x: Union[int, float],
+    std_x: Union[int, float],
+    l_corr_t: Union[int, float],
+    std_t: Union[int, float],
+    check_finite: Optional[bool] = False,
+) -> float:
     """
+    Efficient 2D loglikelihood using Kronecker properties.
+
     Given the uncertainty parameters and vectors of the x and t positions
     on a lattice, calculates the loglikelihood of the observations
     for exponential space and time correlation in the additive modeling
     uncertainty and i.i.d. Gaussian noise
 
-    WARNING: This is superceded by kron_loglike_ND_tridiag and will be
-    removed.
+    Warnings:
+        * This is superceded by kron_loglike_ND_tridiag and will be
+        removed.
 
-    INPUT:
-        y: [Nx, Nt] Array of observations
-        x, t: [1, Nx], [1, Nt] Space and time point vectors
-        lcorr: Space and time correlation lengthscale
-        std: Standard deviation
+    Args:
+        y: [Nx, Nt] Array of observations.
+        x: [1, Nx] Vector of space coordinates.
+        t: [1, Nt] Vector of time coordinates.
+        std_meas: Vector of measurement uncertainty std. dev.
+        l_corr_x: Spatial correlation length.
+        std_x: Std. dev. of model prediction uncertainty in space.
+        l_corr_t: Temporal correlation length.
+        std_t: Std. dev. of model prediction uncertainty in time.
+        check_finite: Optional flag of scipy.linalg.eigh_tridiagonal.
 
-    OPTIONAL:
-        check_finite: Optional flag of scipy.linalg.eigh_tridiagonal. False improves
-        performance
-
-    RETURNS:
-        L: Loglikelihood assuming exponential covariance and additive modeling
-        uncertainty
+    Returns:
+        L: Loglikelihood.
     """
 
     Nx = len(x)
@@ -245,29 +246,32 @@ def kron_loglike_2D_tridiag(
 
 
 def kron_loglike_temporal(
-    y, std_meas, cov_mx_x, t, l_corr_t, std_t, check_finite=False
-):
+    y: np.ndarray,
+    std_meas: Union[int, float],
+    cov_mx_x: np.ndarray,
+    t: np.ndarray,
+    l_corr_t: Union[int, float],
+    std_t: Union[int, float],
+    check_finite: Optional[bool] = False,
+) -> float:
     """
-    Efficient loglikelihood evaluation for Kronecker covariance matrices
-    with Markovian temporal covariance.
+    Efficient loglikelihood for Exponential temporal correlation.
 
     Any combination of a single dimension with Markovian covariance and N
     nonseparable dimensions with non-Markovian covariance can be evaluated
     using this function.
 
-    INPUT:
-        y: [Nx, Nt] Array of observations
-        t: [1, Nt] Time point vector
-        lcorr: Time correlation lengthscale
-        std: Standard deviation
+    Args:
+        y: [Nx, Nt] Array of observations.
+        std_meas: Std. dev. of measurement uncertainty.
+        cov_mx_x: Covariance matrix of the model prediction uncertainty in space.
+        t: [1, Nt] Time point vector.
+        l_corr_t: Temporal correlation length.
+        std_t: Std. dev. of model prediction uncertainty in time.
+        check_finite: Optional flag of scipy.linalg.eigh_tridiagonal.
 
-    OPTIONAL:
-        check_finite: Optional flag of scipy.linalg.eigh_tridiagonal. False improves
-        performance
-
-    RETURNS:
-        L: Loglikelihood assuming exponential covariance and additive modeling
-        uncertainty
+    Returns:
+        L: Loglikelihood.
     """
 
     Nx = np.shape(cov_mx_x)[0]
@@ -300,17 +304,17 @@ def kron_loglike_ND_tridiag(
     y: Union[List, np.ndarray],
     x: List,
     std_meas: Union[int, float],
-    std_model: Union[List, np.ndarray, int, float],
-    lcorr_d: Union[int, float, np.ndarray],
-    check_finite=False,
+    std_model: Union[List, np.ndarray],
+    lcorr_d: Union[List, np.ndarray],
+    check_finite: Optional[bool] = False,
 ) -> float:
     """
     Args:
-        y:
-        x:
-        std_meas:
-        std_model:
-        lcorr_d:
+        y: Vector of measurements.
+        x: List of lists, each containing the coordinate vector of a dim.
+        std_meas: Std. dev. of the measurement uncertainty.
+        std_model: List of vectors of the model uncertainty std. dev. per dim.
+        lcorr_d: Correlation lengths for each dimension.
         check_finite:
 
     Returns:
@@ -350,7 +354,7 @@ def kron_loglike_ND_tridiag(
     logdet_C = np.sum(np.log(C))
 
     # Kronecker mvm. Note that eigenvec(A) = eigenvec(A^-1)
-    a = kron_op(w_d, y, transa=True)
+    a = kron_op(w_d, y, transA=True)
     a = a * 1 / C
     a = kron_op(w_d, a)
     ySy = np.sum(y * a)
@@ -388,6 +392,7 @@ def chol_loglike_1D(
         std_meas: [N, ] vector of measurement uncertainty std. dev.
 
     Returns:
+        L: Loglikelihood.
     """
 
     # Initialization
