@@ -1,22 +1,39 @@
+from typing import List, Optional, Union
+
 import numpy as np
 from numba import prange
 
 from tripy.utils import chol_tridiag, inv_cov_vec_1D, kron_op, solve_lin_bidiag_mrhs
 
 
-def chol_sample_1D(coords, std_noise, std_model, lcorr, y_model=None, size=1):
+def chol_sample_1D(
+    coords: np.ndarray,
+    std_noise: Union[np.ndarray, float, int],
+    std_model: np.ndarray,
+    lcorr: Union[float, int],
+    y_model: Optional[np.ndarray] = None,
+    size: Optional[int] = 1,
+) -> np.ndarray:
     """
+    Efficient sampling from Exponentially correlated MVN distribution in 1D.
+
+    Utilizes the tridiagonal inverse of the correlation matrix to efficiently
+    sample from large Multivariate Normal distributions using a Cholesky decomposition.
+
+    Warnings:
+        This function has not been validated against a reference implementation, and
+        should not be trusted.
 
     Args:
-        coords:
-        std_noise:
-        std_model:
-        lcorr:
-        y_model:
-        size:
+        coords: [1, N] vector of coordinates.
+        std_noise: [1, N] vector of std. dev. of the measurement uncertainty.
+        std_model: [1, N] vector of std. dev. of the modeling uncertainty.
+        lcorr: Scalar correlation length.
+        y_model: [1, N] vector of model predictions.
+        size: Number of samples.
 
     Returns:
-
+        [size, N] array of samples.
     """
 
     N = len(coords)
@@ -41,16 +58,40 @@ def chol_sample_1D(coords, std_noise, std_model, lcorr, y_model=None, size=1):
 
 
 def kron_sample_2D(
-    coords_x,
-    coords_t,
-    std_noise,
-    std_model_x,
-    std_model_t,
-    lcorr_x,
-    lcorr_t,
-    y_model=None,
-    size=1,
-):
+    coords_x: np.ndarray,
+    coords_t: np.ndarray,
+    std_noise: Union[np.ndarray, float, int],
+    std_model_x: np.ndarray,
+    std_model_t: np.ndarray,
+    lcorr_x: Union[float, int],
+    lcorr_t: Union[float, int],
+    y_model: Optional[np.ndarray] = None,
+    size: Optional[int] = 1,
+) -> np.ndarray:
+    """
+    Efficient sampling from Exponentially correlated MVN distribution in 2D.
+
+    Utilizes the tridiagonal inverse of the correlation matrix to efficiently
+    sample from large Multivariate Normal distributions using Kronecker properties.
+
+    Warnings:
+        This function has not been validated against a reference implementation, and
+        should not be trusted.
+
+    Args:
+        coords_x: [1, Nx] vector of spatial coordinates.
+        coords_t: [1, Nt] vector of temporal coordinates.
+        std_noise: [1, Nx * Nt] Vector std. dev. of the measurement uncertainty.
+        std_model_x: [1, Nx] Vector std. dev. of the modeling uncertainty in space.
+        std_model_t: [1, Nt] Vector std. dev. of the modeling uncertainty in time.
+        lcorr_x: Scalar spatial correlation length.
+        lcorr_t: Scalar temporal correlation length.
+        y_model: [Nx, Nt] Array of model predictions.
+        size: Scalar number of samples.
+
+    Returns:
+        [size, Nx * Nt] array of samples.
+    """
 
     # Get size of field
     Nx = len(coords_x)
@@ -82,15 +123,34 @@ def kron_sample_2D(
     return Z + S
 
 
-def kron_sample_ND(coords, std_noise, std_model, lcorr, y_model=None, size=1):
+def kron_sample_ND(
+    coords: List,
+    std_noise: np.ndarray,
+    std_model: List,
+    lcorr: np.ndarray,
+    y_model: Optional[np.ndarray] = None,
+    size: Optional[int] = 1,
+) -> np.ndarray:
     """
-    :param coords:
-    :param std_noise:
-    :param std_model:
-    :param lcorr:
-    :param y_model:
-    :param size:
-    :return:
+    Efficient sampling from Exponentially correlated MVN distribution in ND.
+
+    Utilizes the tridiagonal inverse of the correlation matrix to efficiently
+    sample from large Multivariate Normal distributions using Kronecker properties.
+
+    Warnings:
+        This function has not been validated against a reference implementation, and
+        should not be trusted.
+
+    Args:
+        coords: [ND] list of vectors of coordinates per dimension.
+        std_noise: [1, prod(ND)] vector of the std. dev. of the measurement uncertainty.
+        std_model: [ND] list of vectors of the modeling uncertainty std. devs. per dim.
+        lcorr: [ND, 1] vector of correlation lengths per dim.
+        y_model: [N1 x N2 x ... x ND] array of model predictions.
+        size: Scalar number of samples.
+
+    Returns:
+        [size, prod(ND)] array of samples.
     """
     # coords: List of ND vectors
     # std_noise: Vector of size prod(ND)
