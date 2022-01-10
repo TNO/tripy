@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2022-01-10)
+### Feature
+* Added testing for block Cholesky decomposition and loglikelihood ([`6b8c172`](https://gitlab.com/GKoune/tripy/-/commit/6b8c172874446859cdfc0a7e0007f9daee369b4a))
+* Added additive 1D cholesky loglikelihood example ([`21b0f9b`](https://gitlab.com/GKoune/tripy/-/commit/21b0f9b353ca0fc5e6c7a7d53bb0ec3ba92c78f3))
+
+### Documentation
+* Improved docstrings in loglikelihood.py and implemented type hinting ([`fd46528`](https://gitlab.com/GKoune/tripy/-/commit/fd465284651f97e58a5b27fe5a2b2ecc9796a208))
+* Added sphinx.ext.todo extension to support todo's in docs ([`7e72dcb`](https://gitlab.com/GKoune/tripy/-/commit/7e72dcb350e241412b07a87234f0b8f0aedbdf4b))
+
 ## v0.2.2 (2021-11-29)
 ### Fix
 * Fixed typo in setup.py ([`d75ead0`](https://gitlab.com/GKoune/tripy/-/commit/d75ead086f6425dde596506c971c2dab7d652d25))
