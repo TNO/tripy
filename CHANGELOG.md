@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2022-01-10)
+### Documentation
+* Added docstrings and typehints to sampling.py ([`9d9baf1`](https://gitlab.com/GKoune/tripy/-/commit/9d9baf1080f806345919cc8e9d9e888c9588bf16))
+
 ## v0.3.0 (2022-01-10)
 ### Feature
 * Added testing for block Cholesky decomposition and loglikelihood ([`6b8c172`](https://gitlab.com/GKoune/tripy/-/commit/6b8c172874446859cdfc0a7e0007f9daee369b4a))
