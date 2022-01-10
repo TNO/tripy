@@ -105,11 +105,11 @@ def chol_loglike_2D(y_res, y_model, Cx, Ct, std_meas):
     # Logdet of noise matrix
     logdet_W = np.sum(2 * np.log(std_meas))
 
-    # Logdet of the full correlation matrix
+    # Logdet of the full correlation matrix and Cholesky factors
     logdet_C = -2 * np.sum(np.log(Lx)) * Nt + -2 * np.sum(np.log(Lt)) * Nx
-
-    # Logdet of Cholesky factors
     logdet_chol = 2 * np.sum(np.log(Ldiag))
+
+    # Sum logdeterminants
     logdet_tot = logdet_W + logdet_C + logdet_chol
 
     return -0.5 * (logdet_tot + xSx + Nx * Nt * np.log(2 * np.pi))
