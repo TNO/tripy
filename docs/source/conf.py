@@ -41,6 +41,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinxcontrib.bibtex",
+    "sphinx.ext.todo",
     # "sphinx_rtd_dark_mode",
 ]
 
