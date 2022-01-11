@@ -29,6 +29,7 @@ hidden:
 
 installation
 methods
+auto_examples/index
 api
 references
 ```

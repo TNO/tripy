@@ -16,6 +16,7 @@ import sys
 
 from tripy import __version__
 
+sys.path.insert(0, os.path.abspath("../../tripy"))
 sys.path.insert(0, os.path.abspath("../.."))
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -41,9 +42,20 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
     "sphinxcontrib.bibtex",
+    "sphinx.ext.mathjax",
     "sphinx.ext.todo",
+    "sphinx_gallery.gen_gallery",
     # "sphinx_rtd_dark_mode",
 ]
+
+# Sphinx gallery configuration
+sphinx_gallery_conf = {
+    "examples_dirs": "examples",  # path to your example scripts
+    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "download_all_examples": False,
+    "show_signature": False,
+    "remove_config_comments": True,
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

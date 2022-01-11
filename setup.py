@@ -27,6 +27,7 @@ doc_requires = [
     "myst-parser<1",
     "sphinx-rtd-theme<2",
     "sphinx-rtd-dark-mode<2",
+    "sphinx_gallery<1",
 ]
 test_requires = [
     "pytest",
