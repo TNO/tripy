@@ -152,11 +152,6 @@ def kron_sample_ND(
     Returns:
         [size, prod(ND)] array of samples.
     """
-    # coords: List of ND vectors
-    # std_noise: Vector of size prod(ND)
-    # std_model: List of ND vectors
-    # lcorr: Vector of size ND
-    # y_model: Array of size [N1 x N2 x ... x ND]
 
     Ni = []
     L = []
