@@ -17,6 +17,7 @@ from tripy.utils import (
     kron_op,
     symm_tri_block_chol,
     symm_tri_block_solve,
+    symm_tri_mvm,
 )
 
 
@@ -365,11 +366,11 @@ def kron_loglike_ND_tridiag(
 
 def chol_loglike_1D(
     coord_x: np.ndarray,
-    y_model: np.ndarray,
     y_res: np.ndarray,
     l_corr: Union[int, float],
     std_model: np.ndarray,
-    std_meas: np.ndarray,
+    std_meas: Optional[np.ndarray] = None,
+    y_model: Optional[np.ndarray] = None,
 ) -> float:
     """
     Efficient Gaussian loglikelihood for 1D problems with exponential correlation.
@@ -380,16 +381,15 @@ def chol_loglike_1D(
 
     Args:
         coord_x: [N, ] vector of coordinates
-        y_model: [N, ] vector of model predictions in the case of multiplicative
-        model prediction uncertainty or vector of ones in the case of additive model
-        prediction uncertainty.
         y_res: [N, ] vector of residuals between measurement and model prediction.
         l_corr: Scalar correlation length
         std_model: [N, ] vector of model prediction uncertainty coefficient
         of variation in case of multiplicative model prediction uncertainty,
         or vector of std. devs. for additive in the case of additive model
         prediction uncertainty.
-        std_meas: [N, ] vector of measurement uncertainty std. dev.
+        std_meas: [N, ] optional vector of measurement uncertainty std. dev.
+        y_model: [N, ] optional vector of model predictions in the case of
+        multiplicative model prediction uncertainty.
 
     Returns:
         L: Loglikelihood.
@@ -398,29 +398,53 @@ def chol_loglike_1D(
     # Initialization
     Nx = len(coord_x)
 
-    # Inverse covariance in vector form
-    d0, d1 = inv_cov_vec_1D(coord_x, l_corr, std_model)
+    # Set y_model to vector of ones if None is specified
+    if y_model is None:
+        y_model = np.ones(Nx)
 
-    # Assemble terms of Eqs 50 - 52
-    W = 1 / (np.ones(Nx) * std_meas ** 2)  # Inverse noise vector
-    yWy = np.sum(y_res ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
-    GWG = y_model ** 2 * (1 / std_meas ** 2)
-    Wyx = W * y_model * y_res
-    d0_yWy = d0 + GWG
+    if std_meas is None:
+        # Inverse covariance in vector form
+        d0, d1 = inv_cov_vec_1D(coord_x, l_corr, std_model * y_model)
 
-    # Factorize symmetric tridiagonal matrices
-    D, L = chol_tridiag(d0, d1)
-    Dw, Lw = chol_tridiag(d0_yWy, d1)
+        # Factorize
+        D, L = chol_tridiag(d0, d1)
 
-    # Cholesky solve
-    X = cho_solve_symm_tridiag(Dw, Lw, Wyx)
-    ySigmay = yWy - np.sum(Wyx * X)
+        # Cholesky solve
+        X = symm_tri_mvm(d0, d1, y_res)
+        ySigmay = np.sum(y_res * X)
 
-    # Calculate determinants
-    logdet_cov = -2 * np.sum(np.log(D))  # Logdet of the inverse covariance matrix
-    logdet_C_yWy = 2 * np.sum(np.log(Dw))  # Logdet of the inverse cov + Y*W*Y
-    logdet_W = np.sum(-np.log(W))
-    logdet_Sigma = logdet_C_yWy + logdet_W + logdet_cov
+        # Determinants
+        logdet_Sigma = -2 * np.sum(np.log(D))
 
-    # Return loglikelihood
-    return -0.5 * (logdet_Sigma + ySigmay + Nx * np.log(2 * np.pi))
+        # Sum terms
+        loglike = -0.5 * (logdet_Sigma + ySigmay + Nx * np.log(2 * np.pi))
+
+    else:
+        # Inverse covariance in vector form
+        d0, d1 = inv_cov_vec_1D(coord_x, l_corr, std_model)
+
+        # Assemble terms of Eqs 50 - 52
+        W = 1 / (np.ones(Nx) * std_meas ** 2)  # Inverse noise vector
+        yWy = np.sum(y_res ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
+        GWG = y_model ** 2 * (1 / std_meas ** 2)
+        Wyx = W * y_model * y_res
+        d0_yWy = d0 + GWG
+
+        # Factorize symmetric tridiagonal matrices
+        D, L = chol_tridiag(d0, d1)
+        Dw, Lw = chol_tridiag(d0_yWy, d1)
+
+        # Cholesky solve
+        X = cho_solve_symm_tridiag(Dw, Lw, Wyx)
+        ySigmay = yWy - np.sum(Wyx * X)
+
+        # Calculate determinants
+        logdet_cov = -2 * np.sum(np.log(D))  # Logdet of the inverse covariance matrix
+        logdet_C_yWy = 2 * np.sum(np.log(Dw))  # Logdet of the inverse cov + Y*W*Y
+        logdet_W = np.sum(-np.log(W))
+        logdet_Sigma = logdet_C_yWy + logdet_W + logdet_cov
+
+        # Sum terms
+        loglike = -0.5 * (logdet_Sigma + ySigmay + Nx * np.log(2 * np.pi))
+
+    return loglike
