@@ -2,6 +2,15 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2022-01-12)
+### Feature
+* Updated integration test for cholesky 1D likelihood ([`2bdeab1`](https://gitlab.com/GKoune/tripy/-/commit/2bdeab13971589db9ceff2c7c2c603533c80d7a8))
+* Reworked chol_loglike_1D to make measurement uncertainty and multiplicative scaling factor optional ([`cd5b377`](https://gitlab.com/GKoune/tripy/-/commit/cd5b377dd07c6cecdb9c8bff6c86c221a897ceb4))
+
+### Documentation
+* Fixed kron_saple_ND docstring ([`984d63b`](https://gitlab.com/GKoune/tripy/-/commit/984d63bbb9e4bdd53f1da8ed0b4acb12530e3dda))
+* Added first test usage example using sphinx-gallery ([`5bc26f9`](https://gitlab.com/GKoune/tripy/-/commit/5bc26f9a571fd68a72dfeceeae579c5c3cde87ef))
+
 ## v0.3.1 (2022-01-10)
 ### Documentation
 * Added docstrings and typehints to sampling.py ([`9d9baf1`](https://gitlab.com/GKoune/tripy/-/commit/9d9baf1080f806345919cc8e9d9e888c9588bf16))
