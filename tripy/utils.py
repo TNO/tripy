@@ -492,7 +492,7 @@ def bidiag_mmm(A, B, side="L"):
     return res
 
 
-def symtri_mvm(d0, d1, b):
+def symm_tri_mvm(d0, d1, b):
     """
     Efficient symmetric tridiagonal matrix - vector multiplication
     """
