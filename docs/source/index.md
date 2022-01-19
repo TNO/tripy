@@ -20,6 +20,9 @@ The work of {cite}`Cheong2016`, {cite}`Stegle2011` and {cite}`Gilboa2015` is ext
 
 **sampling**: Functions for efficient sampling.
 
+## Usage
+![Usage flowchart](../figures/loglikelihood_selection_flowchart.png "Loglikelihood function selection flowchart")
+
 
 
 ```{toctree}

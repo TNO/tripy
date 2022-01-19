@@ -18,6 +18,9 @@ A package for efficient[^1] likelihood evaluation and sampling for Multivariate 
 
 **sampling**: Functions for efficient sampling.
 
+## Usage
+![Usage flowchart](docs/figures/loglikelihood_selection_flowchart.png "Loglikelihood function selection flowchart")
+
 ## TODOs
 * Validation of all functions against reference implementations.
 * Documentation, including examples and timing tests.
