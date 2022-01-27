@@ -11,7 +11,7 @@ from scipy.linalg.lapack import dpotrf
 from torch.distributions import MultivariateNormal
 
 from tripy.utils import (
-    _cast_to_array,
+    _cast_scalar_to_array,
     cho_solve_symm_tridiag,
     chol_tridiag,
     inv_cov_vec_1D,
@@ -88,7 +88,7 @@ def chol_loglike_2D(
     Ldiag = np.diagonal(L, axis1=1, axis2=2)
 
     # Cast noise to array
-    std_meas = _cast_to_array(std_meas, Nx * Nt)
+    std_meas = _cast_scalar_to_array(std_meas, Nx * Nt)
 
     # Vectors to be used later
     Winv_vec = 1 / std_meas ** 2
@@ -454,7 +454,7 @@ def chol_loglike_1D(
 
     else:
         # Cast noise std. dev. to array
-        std_meas = _cast_to_array(std_meas, Nx)
+        std_meas = _cast_scalar_to_array(std_meas, Nx)
 
         # Inverse covariance in vector form
         d0, d1 = inv_cov_vec_1D(x, l_corr, std_model)
