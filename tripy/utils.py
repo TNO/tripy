@@ -268,6 +268,8 @@ def inv_cov_vec_1D(
     Nx = len(coord_x)
     a = np.exp(-np.diff(coord_x) / l_corr)
 
+    # Check if std is scalar
+
     # Initialize arrays
     C_0 = np.zeros(Nx)
 
@@ -543,3 +545,14 @@ def mult_along_axis(A, B, axis):
     B_brc = np.swapaxes(B_brc, A.ndim - 1, axis)
 
     return A * B_brc
+
+
+def _cast_to_array(arg, shape):
+    """
+    Check if arg is int or float and turn into array of shape(x)
+    """
+
+    if isinstance(arg, (int, float)):
+        arg = np.tile(arg, shape)
+
+    return arg
