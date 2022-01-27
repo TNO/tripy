@@ -11,6 +11,7 @@ from scipy.linalg.lapack import dpotrf
 from torch.distributions import MultivariateNormal
 
 from tripy.utils import (
+    _cast_to_array,
     cho_solve_symm_tridiag,
     chol_tridiag,
     inv_cov_vec_1D,
@@ -26,7 +27,7 @@ def chol_loglike_2D(
     y_model: np.ndarray,
     Cx: Union[np.ndarray, List],
     Ct: List,
-    std_meas: np.ndarray,
+    std_meas: Union[int, float, np.ndarray],
 ) -> float:
     """
     Efficient 2D loglikelihood using block Cholesky decomposition.
@@ -78,8 +79,11 @@ def chol_loglike_2D(
     # Get diagonal elements of L
     Ldiag = np.diagonal(L, axis1=1, axis2=2)
 
+    # Cast noise to array
+    std_meas = _cast_to_array(std_meas, Nx * Nt)
+
     # Vectors to be used later
-    Winv_vec = np.ones(Nx * Nt) / std_meas ** 2
+    Winv_vec = 1 / std_meas ** 2
     yWy = np.sum(y_res ** 2 * (1 / std_meas ** 2))
     WGx = Winv_vec * y_model.ravel() * y_res.ravel()
 
@@ -183,7 +187,7 @@ def kron_loglike_2D_tridiag(
     y: np.ndarray,
     x: np.ndarray,
     t: np.ndarray,
-    std_meas: np.ndarray,
+    std_meas: Union[int, float],
     l_corr_x: Union[int, float],
     std_x: Union[int, float],
     l_corr_t: Union[int, float],
@@ -204,8 +208,8 @@ def kron_loglike_2D_tridiag(
 
     Args:
         y: [Nx, Nt] Array of observations.
-        x: [1, Nx] Vector of space coordinates.
-        t: [1, Nt] Vector of time coordinates.
+        x: [Nx,] Vector of space coordinates.
+        t: [Nt,] Vector of time coordinates.
         std_meas: Vector of measurement uncertainty std. dev.
         l_corr_x: Spatial correlation length.
         std_x: Std. dev. of model prediction uncertainty in space.
@@ -246,13 +250,11 @@ def kron_loglike_2D_tridiag(
     )
 
 
-def kron_loglike_temporal(
+def kron_loglike_2D(
     y: np.ndarray,
-    std_meas: Union[int, float],
-    cov_mx_x: np.ndarray,
-    t: np.ndarray,
-    l_corr_t: Union[int, float],
-    std_t: Union[int, float],
+    C_x: Union[list, np.ndarray],
+    C_t: Union[list, np.ndarray],
+    std_meas: Optional[Union[int, float]],
     check_finite: Optional[bool] = False,
 ) -> float:
     """
@@ -265,26 +267,49 @@ def kron_loglike_temporal(
     Args:
         y: [Nx, Nt] Array of observations.
         std_meas: Std. dev. of measurement uncertainty.
-        cov_mx_x: Covariance matrix of the model prediction uncertainty in space.
-        t: [1, Nt] Time point vector.
-        l_corr_t: Temporal correlation length.
-        std_t: Std. dev. of model prediction uncertainty in time.
+        C_x: Correlation matrix of the model prediction uncertainty in space, or
+        list with diagonal and off-diagonal of tridiagonal inverse.
+        C_t: Correlation matrix of the model prediction uncertainty in time, or
+        list with diagonal and off-diagonal of tridiagonal inverse.
         check_finite: Optional flag of scipy.linalg.eigh_tridiagonal.
 
     Returns:
         L: Loglikelihood.
     """
 
-    Nx = np.shape(cov_mx_x)[0]
-    Nt = len(t)
-    Ct_0, Ct_1 = inv_cov_vec_1D(t, l_corr_t, std_t)
+    # Check if the supplied C_x and C_t are correlation matrices or lists of
+    # the diagonal and off-diagonal vectors of a tridiagonal inverse correlation
+    # matrix. Apply the corresponding eigendecomposition.
+    if isinstance(C_x, list):
+        Nx = np.shape(C_x[0])
+        lambda_x, w_x = eigh_tridiagonal(C_x[0], C_x[1], check_finite=check_finite)
+        lambda_x = 1 / lambda_x
+    elif isinstance(C_x, np.ndarray):
+        Nx = np.shape(C_x)[0]
+        lambda_x, w_x = eigh(C_x, check_finite=check_finite)
+    else:
+        raise ValueError(
+            "C_x must be a numpy array containing the correlation"
+            "matrix, or a list of the diagonal and off diagonal"
+            "vectors of the inverse correlation matrix."
+        )
 
-    # Eigendecomposition using tridiagonality
-    lambda_t, w_t = eigh_tridiagonal(Ct_0, Ct_1, check_finite=check_finite)
-    lambda_x, w_x = eigh(cov_mx_x, check_finite=check_finite)
+    if isinstance(C_t, list):
+        Nt = np.shape(C_t[0])
+        lambda_t, w_t = eigh_tridiagonal(C_t[0], C_t[1], check_finite=check_finite)
+        lambda_t = 1 / lambda_t
+    elif isinstance(C_t, np.ndarray):
+        Nt = np.shape(C_t)[0]
+        lambda_t, w_t = eigh(C_t, check_finite=check_finite)
+    else:
+        raise ValueError(
+            "C_t must be a numpy array containing the correlation"
+            "matrix, or a list of the diagonal and off diagonal"
+            "vectors of the inverse correlation matrix."
+        )
 
     # Kronecker prod of eigenvalues.
-    C_xt = np.kron(lambda_x, 1 / lambda_t) + std_meas ** 2
+    C_xt = np.kron(lambda_x, lambda_t) + std_meas ** 2
 
     # Determinant: C_xt is diagonal. We can therefore sum the log terms. This is the
     # determinant of the inverse.
@@ -302,7 +327,7 @@ def kron_loglike_temporal(
 
 
 def kron_loglike_ND_tridiag(
-    y: Union[List, np.ndarray],
+    y: np.ndarray,
     x: List,
     std_meas: Union[int, float],
     std_model: Union[List, np.ndarray],
@@ -365,11 +390,11 @@ def kron_loglike_ND_tridiag(
 
 
 def chol_loglike_1D(
-    coord_x: np.ndarray,
-    y_res: np.ndarray,
+    x: np.ndarray,
+    y: np.ndarray,
     l_corr: Union[int, float],
-    std_model: np.ndarray,
-    std_meas: Optional[np.ndarray] = None,
+    std_model: Union[int, float, np.ndarray],
+    std_meas: Optional[Union[int, float, np.ndarray]] = None,
     y_model: Optional[np.ndarray] = None,
 ) -> float:
     """
@@ -380,8 +405,8 @@ def chol_loglike_1D(
     prediction uncertainty can be multiplicative or additive.
 
     Args:
-        coord_x: [N, ] vector of coordinates
-        y_res: [N, ] vector of residuals between measurement and model prediction.
+        x: [N, ] vector of coordinates
+        y: [N, ] vector of residuals between measurement and model prediction.
         l_corr: Scalar correlation length
         std_model: [N, ] vector of model prediction uncertainty coefficient
         of variation in case of multiplicative model prediction uncertainty,
@@ -396,7 +421,10 @@ def chol_loglike_1D(
     """
 
     # Initialization
-    Nx = len(coord_x)
+    Nx = len(x)
+
+    # Cast noise std. dev. to array
+    std_meas = _cast_to_array(std_meas, Nx)
 
     # Set y_model to vector of ones if None is specified
     if y_model is None:
@@ -404,14 +432,14 @@ def chol_loglike_1D(
 
     if std_meas is None:
         # Inverse covariance in vector form
-        d0, d1 = inv_cov_vec_1D(coord_x, l_corr, std_model * y_model)
+        d0, d1 = inv_cov_vec_1D(x, l_corr, std_model * y_model)
 
         # Factorize
         D, L = chol_tridiag(d0, d1)
 
         # Cholesky solve
-        X = symm_tri_mvm(d0, d1, y_res)
-        ySigmay = np.sum(y_res * X)
+        X = symm_tri_mvm(d0, d1, y)
+        ySigmay = np.sum(y * X)
 
         # Determinants
         logdet_Sigma = -2 * np.sum(np.log(D))
@@ -421,13 +449,13 @@ def chol_loglike_1D(
 
     else:
         # Inverse covariance in vector form
-        d0, d1 = inv_cov_vec_1D(coord_x, l_corr, std_model)
+        d0, d1 = inv_cov_vec_1D(x, l_corr, std_model)
 
         # Assemble terms of Eqs 50 - 52
         W = 1 / (np.ones(Nx) * std_meas ** 2)  # Inverse noise vector
-        yWy = np.sum(y_res ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
+        yWy = np.sum(y ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
         GWG = y_model ** 2 * (1 / std_meas ** 2)
-        Wyx = W * y_model * y_res
+        Wyx = W * y_model * y
         d0_yWy = d0 + GWG
 
         # Factorize symmetric tridiagonal matrices
