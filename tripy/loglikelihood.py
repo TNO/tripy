@@ -23,11 +23,11 @@ from tripy.utils import (
 
 
 def chol_loglike_2D(
-    y_res: np.ndarray,
-    y_model: np.ndarray,
+    y: np.ndarray,
     Cx: Union[np.ndarray, List],
     Ct: List,
     std_meas: Union[int, float, np.ndarray],
+    y_model: Optional[np.ndarray] = None,
 ) -> float:
     """
     Efficient 2D loglikelihood using block Cholesky decomposition.
@@ -40,17 +40,15 @@ def chol_loglike_2D(
         - Space and time are separable (Kronecker structure)
         - Correlation in time is exponential
 
-    TODO :
-        * Add some basic input checks
-
     Args:
-        y_res: [Nx, Nt] Array of residuals.
-        y_model: [Nx, Nt] Array of model output.
+        y: [Nx, Nt] Array of observations.
         Cx: List of diagonal and off diagonal or full inverse of spatial
             correlation matrix.
         Ct: List of iagonal and off-diagonal of inverse of Exponential temporal
          correlation matrix.
         std_meas: Std. dev. of the measurement uncertainty.
+        y_model: [Nx, Nt] optional vector of model predictions in the case of
+        multiplicative model prediction uncertainty.
 
     Returns:
         L: Loglikelihood.
@@ -61,9 +59,15 @@ def chol_loglike_2D(
         # TODO: Change dpttrf to chol_tridiag
         Nx = len(Cx[0])
         Lx = chol_tridiag(Cx[0], Cx[1])[0]
-    else:
+    elif isinstance(Cx, np.ndarray):
         Nx = np.shape(Cx)[0]
         Lx = np.diag(dpotrf(Cx, lower=1, clean=1, overwrite_a=0)[0])
+    else:
+        raise ValueError(
+            "C_x must be a numpy array containing the correlation"
+            "matrix, or a list of the diagonal and off-diagonal"
+            "vectors of the inverse correlation matrix."
+        )
 
     if isinstance(Ct, list):
         Nt = len(Ct[0])
@@ -73,6 +77,10 @@ def chol_loglike_2D(
             "Ct must be a list containing the diagonal and "
             "off-diagonal vectors of a tridiagonal matrix"
         )
+
+    # Set y_model to vector of ones if None is specified
+    if y_model is None:
+        y_model = np.ones(Nt, Nx)
 
     L, C = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y_model)
 
@@ -84,8 +92,8 @@ def chol_loglike_2D(
 
     # Vectors to be used later
     Winv_vec = 1 / std_meas ** 2
-    yWy = np.sum(y_res ** 2 * (1 / std_meas ** 2))
-    WGx = Winv_vec * y_model.ravel() * y_res.ravel()
+    yWy = np.sum(y ** 2 * (1 / std_meas ** 2))
+    WGx = Winv_vec * y_model.ravel() * y.ravel()
 
     # Solve the linear system
     X = symm_tri_block_solve(L, C, WGx, Nx, Nt)
@@ -290,7 +298,7 @@ def kron_loglike_2D(
     else:
         raise ValueError(
             "C_x must be a numpy array containing the correlation"
-            "matrix, or a list of the diagonal and off diagonal"
+            "matrix, or a list of the diagonal and off-diagonal"
             "vectors of the inverse correlation matrix."
         )
 
@@ -304,7 +312,7 @@ def kron_loglike_2D(
     else:
         raise ValueError(
             "C_t must be a numpy array containing the correlation"
-            "matrix, or a list of the diagonal and off diagonal"
+            "matrix, or a list of the diagonal and off-diagonal"
             "vectors of the inverse correlation matrix."
         )
 
@@ -423,9 +431,6 @@ def chol_loglike_1D(
     # Initialization
     Nx = len(x)
 
-    # Cast noise std. dev. to array
-    std_meas = _cast_to_array(std_meas, Nx)
-
     # Set y_model to vector of ones if None is specified
     if y_model is None:
         y_model = np.ones(Nx)
@@ -448,6 +453,9 @@ def chol_loglike_1D(
         loglike = -0.5 * (logdet_Sigma + ySigmay + Nx * np.log(2 * np.pi))
 
     else:
+        # Cast noise std. dev. to array
+        std_meas = _cast_to_array(std_meas, Nx)
+
         # Inverse covariance in vector form
         d0, d1 = inv_cov_vec_1D(x, l_corr, std_model)
 

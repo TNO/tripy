@@ -81,7 +81,7 @@ def test_block_cholesky_loglikelihood():
     loglike_linear_normal = log_likelihood_linear_normal(
         y_model, y_obs, phys_model, k_cov_mx, e_cov_mx
     )[0]
-    loglike_chol = chol_loglike_2D(y_obs - y_model, y_model, Cx, Ct, std_meas)
+    loglike_chol = chol_loglike_2D(y_obs - y_model, Cx, Ct, std_meas, y_model=y_model)
 
     assert np.allclose(loglike_chol, loglike_linear_normal)
     assert np.allclose(loglike_chol, loglike_ref)
@@ -101,7 +101,7 @@ def test_block_cholesky_loglikelihood():
     loglike_linear_normal = log_likelihood_linear_normal(
         y_model, y_obs, phys_model, k_cov_mx, e_cov_mx
     )[0]
-    loglike_chol = chol_loglike_2D(y_obs - y_model, y_model, Cx, Ct, std_meas)
+    loglike_chol = chol_loglike_2D(y_obs - y_model, Cx, Ct, std_meas, y_model=y_model)
 
     assert np.allclose(loglike_chol, loglike_linear_normal)
     assert np.allclose(loglike_chol, loglike_ref)
@@ -144,7 +144,9 @@ def test_block_cholesky_loglikelihood():
     loglike_linear_normal = log_likelihood_linear_normal(
         y_model.ravel(), y_obs.ravel(), phys_model, k_cov_mx, e_cov_mx
     )[0]
-    loglike_chol = chol_loglike_2D(y_res.ravel(), y_model.ravel(), Ct, Cx, std_meas)
+    loglike_chol = chol_loglike_2D(
+        y_res.ravel(), Ct, Cx, std_meas, y_model=y_model.ravel()
+    )
 
     assert np.allclose(loglike_chol, loglike_linear_normal)
     assert np.allclose(loglike_chol, loglike_ref)
