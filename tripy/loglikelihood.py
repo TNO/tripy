@@ -38,10 +38,12 @@ def chol_loglike_2D(
     is intended that this function is general and works with any combination
     of spatial and temporal covariance, with only the following restrictions:
         - Space and time are separable (Kronecker structure)
-        - Correlation in time is exponential
+        - At least one generalized dimension (space or time) has only one subdimension
+        and exponential correlation
 
     Args:
-        y: [Nx, Nt] Array of observations.
+        y: [Nx, Nt] Array of observations or residuals between measurements
+        and model predictions.
         Cx: List of diagonal and off diagonal or full inverse of spatial
             correlation matrix.
         Ct: List of iagonal and off-diagonal of inverse of Exponential temporal
@@ -215,7 +217,8 @@ def kron_loglike_2D_tridiag(
         removed.
 
     Args:
-        y: [Nx, Nt] Array of observations.
+        y: [Nx, Nt] Array of observations or residuals between measurements
+        and model predictions.
         x: [Nx,] Vector of space coordinates.
         t: [Nt,] Vector of time coordinates.
         std_meas: Vector of measurement uncertainty std. dev.
@@ -273,7 +276,8 @@ def kron_loglike_2D(
     using this function.
 
     Args:
-        y: [Nx, Nt] Array of observations.
+        y: [Nx, Nt] Array of observations or residuals between measurements
+        and model predictions.
         std_meas: Std. dev. of measurement uncertainty.
         C_x: Correlation matrix of the model prediction uncertainty in space, or
         list with diagonal and off-diagonal of tridiagonal inverse.
@@ -344,7 +348,8 @@ def kron_loglike_ND_tridiag(
 ) -> float:
     """
     Args:
-        y: Vector of measurements.
+        y: Vector of observations or residuals between measurements
+        and model predictions.
         x: List of lists, each containing the coordinate vector of a dim.
         std_meas: Std. dev. of the measurement uncertainty.
         std_model: List of vectors of the model uncertainty std. dev. per dim.
@@ -398,8 +403,8 @@ def kron_loglike_ND_tridiag(
 
 
 def chol_loglike_1D(
-    x: np.ndarray,
     y: np.ndarray,
+    x: np.ndarray,
     l_corr: Union[int, float],
     std_model: Union[int, float, np.ndarray],
     std_meas: Optional[Union[int, float, np.ndarray]] = None,
@@ -413,8 +418,9 @@ def chol_loglike_1D(
     prediction uncertainty can be multiplicative or additive.
 
     Args:
+        y: [N, ] Vector of observations or residuals between measurements
+        and model predictions.
         x: [N, ] vector of coordinates
-        y: [N, ] vector of residuals between measurement and model prediction.
         l_corr: Scalar correlation length
         std_model: [N, ] vector of model prediction uncertainty coefficient
         of variation in case of multiplicative model prediction uncertainty,

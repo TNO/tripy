@@ -55,7 +55,7 @@ def test_chol_loglike_1D_multiplicative():
     # Evaluate the loglikelihood
     logL_ref = stats.multivariate_normal.logpdf(y_res, cov=cov_mx)
     logL_chol = chol_loglike_1D(
-        x, y_res, lcorr, std_model, std_meas=std_meas, y_model=y_model
+        y_res, x, lcorr, std_model, std_meas=std_meas, y_model=y_model
     )
 
     # Compare the two solutions
@@ -103,7 +103,7 @@ def test_chol_loglike_1D_additive():
     # Evaluate the loglikelihood
     logL_ref = stats.multivariate_normal.logpdf(y_res, cov=cov_mx)
     logL_chol = chol_loglike_1D(
-        x, y_res, lcorr, std_model, std_meas=std_meas, y_model=y_model
+        y_res, x, lcorr, std_model, std_meas=std_meas, y_model=y_model
     )
 
     # Compare the two solutions
@@ -148,7 +148,7 @@ def test_chol_loglike_1D_no_noise():
 
     # Evaluate the loglikelihood
     logL_ref = stats.multivariate_normal.logpdf(y_res, cov=kph_cov_mx)
-    logL_chol = chol_loglike_1D(x, y_res, lcorr, std_model, y_model=y_model)
+    logL_chol = chol_loglike_1D(y_res, x, lcorr, std_model, y_model=y_model)
 
     # Compare the two solutions
     print(logL_ref)
@@ -182,7 +182,7 @@ def test_chol_loglike_1D_no_noise():
 
     # Evaluate the loglikelihood
     logL_ref = stats.multivariate_normal.logpdf(y_res, cov=corr_mx)
-    logL_chol = chol_loglike_1D(x, y_res, lcorr, std_model)
+    logL_chol = chol_loglike_1D(y_res, x, lcorr, std_model)
 
     # Compare the two solutions
     print(logL_ref)
