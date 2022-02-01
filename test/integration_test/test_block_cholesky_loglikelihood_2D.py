@@ -12,7 +12,7 @@ import numpy as np
 from scipy.stats import multivariate_normal
 
 from tripy.kernels import Exponential
-from tripy.loglikelihood import chol_loglike_2D, log_likelihood_linear_normal
+from tripy.loglikelihood import chol_loglike_2D, log_likelihood_reference
 from tripy.utils import inv_cov_vec_1D
 
 
@@ -78,7 +78,7 @@ def test_block_cholesky_loglikelihood():
 
     # Reference, linear normal and Cholesky solutions
     loglike_ref = multivariate_normal.logpdf(y_obs - y_model, cov=cov)
-    loglike_linear_normal = log_likelihood_linear_normal(
+    loglike_linear_normal = log_likelihood_reference(
         y_model, y_obs, phys_model, k_cov_mx, e_cov_mx
     )[0]
     loglike_chol = chol_loglike_2D(y_obs - y_model, Cx, Ct, std_meas, y_model=y_model)
@@ -98,7 +98,7 @@ def test_block_cholesky_loglikelihood():
 
     # Reference, linear normal and Cholesky solutions
     loglike_ref = multivariate_normal.logpdf(y_obs - y_model, cov=cov)
-    loglike_linear_normal = log_likelihood_linear_normal(
+    loglike_linear_normal = log_likelihood_reference(
         y_model, y_obs, phys_model, k_cov_mx, e_cov_mx
     )[0]
     loglike_chol = chol_loglike_2D(y_obs - y_model, Cx, Ct, std_meas, y_model=y_model)
@@ -141,7 +141,7 @@ def test_block_cholesky_loglikelihood():
 
     # Reference, linear normal and Cholesky solutions
     loglike_ref = multivariate_normal.logpdf(y_res.ravel(), cov=cov)
-    loglike_linear_normal = log_likelihood_linear_normal(
+    loglike_linear_normal = log_likelihood_reference(
         y_model.ravel(), y_obs.ravel(), phys_model, k_cov_mx, e_cov_mx
     )[0]
     loglike_chol = chol_loglike_2D(
