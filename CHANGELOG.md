@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2022-02-02)
+### Feature
+* Fixed loglikelihood.py and updated test_block_cholesky_loglikelihood_2D to account for change in call signature of chol_loglike_2D ([`4f15832`](https://gitlab.com/GKoune/tripy/-/commit/4f15832a8da902cd9b3ad8b349f9e50f7a5bfb10))
+* Reworked some call signatures and docstrings for consistency, reworked kron_loglike_2D to work in cases with no tridiagonality. ([`ffa75a8`](https://gitlab.com/GKoune/tripy/-/commit/ffa75a87fd90818ae2c72323875bd748e6fadaeb))
+* Utility function for checking and casting standard deviation into arrays ([`227778b`](https://gitlab.com/GKoune/tripy/-/commit/227778b22e61e0e6e88c9fa8d01ed81793c54da6))
+
+### Fix
+* Fixed input shape of chol_loglike_2D ([`36ed7ed`](https://gitlab.com/GKoune/tripy/-/commit/36ed7ed28a46f9ea17f5cc8a2ff2a20d62cced24))
+* Added casting of scalars to arrays in inv_cov_vec_1D. Closes #5 ([`699c50e`](https://gitlab.com/GKoune/tripy/-/commit/699c50e37e94299a495479d9aa0316a7d1a26fd5))
+
+### Documentation
+* Fixed 1D cholesky example ([`b508b7b`](https://gitlab.com/GKoune/tripy/-/commit/b508b7b66edc6bdb45a916f4ee1a314409069847))
+
 ## v0.4.0 (2022-01-12)
 ### Feature
 * Updated integration test for cholesky 1D likelihood ([`2bdeab1`](https://gitlab.com/GKoune/tripy/-/commit/2bdeab13971589db9ceff2c7c2c603533c80d7a8))
