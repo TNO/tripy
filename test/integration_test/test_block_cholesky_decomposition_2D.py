@@ -25,7 +25,7 @@ def test_block_cholesky_decomposition():
     x = np.sort(np.linspace(0, 1, Nx) + np.random.rand(Nx) * 0.1)
     t = np.sort(np.linspace(0, 1, Nt) + np.random.rand(Nt) * 0.1)
 
-    std_meas = np.repeat(1.0, Nx * Nt) + np.random.rand(Nx * Nt) + 0.1
+    std_meas = np.tile(1.0, (Nx, Nt)) + np.random.rand(Nx, Nt) + 0.1
     std_model = np.random.rand(Nt) + 0.1
 
     lcorr_x = 1.0
@@ -55,17 +55,13 @@ def test_block_cholesky_decomposition():
     #   * With/without tridiagonality in space
     # =====================================================================
 
-    # =====================================================================
-    # Tridiagonality in both space and time
-    # =====================================================================
-
-    # No scaling vector
+    # Tridiagonality in both space and time, no scaling vector
     # ---------------------------------------------------------------------
     Cx = [Cx_0, Cx_1]
     Ct = [Ct_0, Ct_1]
-    y = np.ones(Nx * Nt)
+    y = np.ones((Nx, Nt))
     GWG = y ** 2 * (1 / std_meas ** 2)
-    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG)
+    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
     L_ref = np.linalg.cholesky(cov_mx_ref)
@@ -80,13 +76,13 @@ def test_block_cholesky_decomposition():
         blck_C_ref = get_block_by_index(L_ref, i + 1, i, Nx)
         assert np.allclose(blck_C_ref, C_test[i])
 
-    # With scaling vector
+    # Tridiagonality in both space and time, with scaling vector
     # ---------------------------------------------------------------------
     Cx = [Cx_0, Cx_1]
     Ct = [Ct_0, Ct_1]
-    y = np.random.rand(Nx * Nt) * 0.1
+    y = np.random.rand(Nx, Nt) * 0.1
     GWG = y ** 2 * (1 / std_meas ** 2)
-    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG)
+    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     # Without scaling vector
     L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
@@ -110,9 +106,9 @@ def test_block_cholesky_decomposition():
     # ---------------------------------------------------------------------
     Cx = inv_cov_mx_x
     Ct = [Ct_0, Ct_1]
-    y = np.ones(Nx * Nt)
+    y = np.ones((Nx, Nt))
     GWG = y ** 2 * (1 / std_meas ** 2)
-    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG)
+    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     # Without scaling vector
     L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
@@ -132,9 +128,9 @@ def test_block_cholesky_decomposition():
     # ---------------------------------------------------------------------
     Cx = inv_cov_mx_x
     Ct = [Ct_0, Ct_1]
-    y = np.random.rand(Nx * Nt) * 0.1
+    y = np.random.rand(Nx, Nt) * 0.1
     GWG = y ** 2 * (1 / std_meas ** 2)
-    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG)
+    cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     # Without scaling vector
     L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
@@ -149,3 +145,6 @@ def test_block_cholesky_decomposition():
     for i in range(Nt - 1):
         blck_C_ref = get_block_by_index(L_ref, i + 1, i, Nx)
         assert np.allclose(blck_C_ref, C_test[i])
+
+
+test_block_cholesky_decomposition()

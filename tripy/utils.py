@@ -139,15 +139,10 @@ def symm_tri_block_chol(Cx, Ct, vec_diag, y=None):
 
     # If y is not supplied create an array of ones
     if y is None:
-        y = np.ones((Nt, Nx))
-    else:
-        y = np.reshape(y, (Nt, Nx))
-
-    # Reshape diagonal vector into array
-    vec_diag = np.reshape(vec_diag, (Nt, Nx))
+        y = np.ones((Nx, Nt))
 
     # Product of noise and model output matrices
-    GWG = y ** 2 / vec_diag
+    GWG = y.T ** 2 / vec_diag.T
 
     # Cholesky of space covariance matrix
     Li = dpotrf(Dd0 * Ct[0][0] + np.diag(GWG[0]), lower=1, clean=1, overwrite_a=0)[0]
@@ -190,7 +185,7 @@ def symm_tri_block_solve(L, C, RHS, Nx, Nt):
     """
 
     # DTRSM
-    Yi = dtrsm(1, L[0], RHS[0:Nx], side=0, lower=1, trans_a=0, diag=0, overwrite_b=0)
+    Yi = dtrsm(1, L[0], RHS[:, 0], side=0, lower=1, trans_a=0, diag=0, overwrite_b=0)
     G = []
     Y = [Yi]
     for i in range(Nt - 1):
@@ -200,7 +195,7 @@ def symm_tri_block_solve(L, C, RHS, Nx, Nt):
             C[i],
             Yi,
             beta=1.0,
-            c=RHS[Nx * (i + 1) : Nx * (i + 2)],
+            c=RHS[:, i + 1],
             trans_a=0,
             trans_b=0,
             overwrite_c=0,
@@ -233,8 +228,7 @@ def symm_tri_block_solve(L, C, RHS, Nx, Nt):
         # DTRSM
         Xi = dtrsm(1.0, L[i - 1], Zi, side=0, lower=1, trans_a=1, diag=0, overwrite_b=0)
         X[i - 1] = Xi
-    X = X.ravel()
-    return X
+    return X.T
 
 
 def inv_cov_vec_1D(

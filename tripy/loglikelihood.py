@@ -184,22 +184,28 @@ def chol_loglike_2D(
             "off-diagonal vectors of a tridiagonal matrix"
         )
 
+    if (Nx < 2) or (Nt < 2):
+        raise ValueError(
+            f"The number of points in each dimension must be > 2"
+            f"but is Nx = {Nx} and Nt = {Nt}."
+        )
+
+    # Cast noise to array
+    std_meas = _cast_scalar_to_array(std_meas, (Nx, Nt))
+
     # Set y_model to vector of ones if None is specified
     if y_model is None:
-        y_model = np.ones(Nt, Nx)
+        y_model = np.ones(Nx, Nt)
 
     L, C = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y_model)
 
     # Get diagonal elements of L
     Ldiag = np.diagonal(L, axis1=1, axis2=2)
 
-    # Cast noise to array
-    std_meas = _cast_scalar_to_array(std_meas, Nx * Nt)
-
     # Vectors to be used later
     Winv_vec = 1 / std_meas ** 2
     yWy = np.sum(y ** 2 * (1 / std_meas ** 2))
-    WGx = Winv_vec * y_model.ravel() * y.ravel()
+    WGx = Winv_vec * y_model * y
 
     # Solve the linear system
     X = symm_tri_block_solve(L, C, WGx, Nx, Nt)
@@ -459,9 +465,9 @@ def log_likelihood_linear_normal(
 
 
     Args:
-        y: [Nx, Nt] Array of observations or residuals between measurements
-        and model predictions.
-        K: covariance matrix of `K`, shape [Nx * Nt, Nx * Nt].
+        y: [N_1, N_2, ... Ni, ... N_d] Array of observations or residuals
+        between measurements and model predictions.
+        K: covariance matrix of `K`, shape [prod(Ni), prod(Ni)].
         std_meas: Std. dev. of the measurement uncertainty.
         y_model: [Nx, Nt] optional vector of model predictions in the case of
         multiplicative model prediction uncertainty.
@@ -474,6 +480,9 @@ def log_likelihood_linear_normal(
     y = y.ravel()
     N = y.size
     y = torch.tensor(y)
+
+    # Cast noise std. dev. to array
+    std_meas = _cast_scalar_to_array(std_meas, N)
 
     k_cov_mx_zero_flag = False
 
