@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2022-02-03)
+### Feature
+* Option to add jitter to the covariance matrix when std_meas is zero ([`170d450`](https://gitlab.com/GKoune/tripy/-/commit/170d450c9cdd009bfe85d9f3247a1ce91c11760f))
+
 ## v0.6.0 (2022-02-03)
 ### Feature
 * Std_meas and y_model are now optional arguments wherever possible. Closes #4 ([`133c7a1`](https://gitlab.com/GKoune/tripy/-/commit/133c7a1a3cf602ad182c9e276f25601499abc6a2))
