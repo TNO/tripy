@@ -268,6 +268,8 @@ def kron_loglike_2D_tridiag(
         l_corr_t: Temporal correlation length.
         std_t: Std. dev. of model prediction uncertainty in time.
         check_finite: Optional flag of scipy.linalg.eigh_tridiagonal.
+        jitter: Optional small scalar noise value to ensure numerical
+        stability in cases with no noise. Default = 1e-6.
 
     Returns:
         L: Loglikelihood.
@@ -335,6 +337,8 @@ def kron_loglike_2D(
         Ct: Correlation matrix of the model prediction uncertainty in time, or
         list with diagonal and off-diagonal of tridiagonal inverse.
         check_finite: Optional flag of scipy.linalg.eigh_tridiagonal.
+        jitter: Optional small scalar noise value to ensure numerical
+        stability in cases with no noise. Default = 1e-6.
 
     Returns:
         L: Loglikelihood.
@@ -407,13 +411,15 @@ def kron_loglike_ND_tridiag(
 ) -> float:
     """
     Args:
-        y: Vector of observations or residuals between measurements
-        and model predictions.
-        x: List of lists, each containing the coordinate vector of a dim.
+        y: [N1, N2, ..., Nd] Vector of observations or residuals between
+        measurements and model predictions.
+        x: List of `d` lists, each containing the coordinate vector of a dim.
         std_meas: Std. dev. of the measurement uncertainty.
         std_model: List of vectors of the model uncertainty std. dev. per dim.
         l_corr_d: Correlation lengths for each dimension.
-        check_finite:
+        check_finite: Optional flag of scipy.linalg.eigh_tridiagonal.
+        jitter: Optional small scalar noise value to ensure numerical
+        stability in cases with no noise. Default = 1e-6.
 
     Returns:
 
@@ -426,6 +432,7 @@ def kron_loglike_ND_tridiag(
         Machine Intelligence, IEEE, 2015
     """
 
+    raise NotImplementedError("Disabled until error is fixed")
     # Initialize arrays
     Nd = []
     lambda_d = []
@@ -453,8 +460,8 @@ def kron_loglike_ND_tridiag(
             raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
         C += std_meas ** 2
     else:
-        C += jitter
-        logdet_C = np.sum(np.log(C))
+        C += jitter ** 2
+    logdet_C = np.sum(np.log(C))
 
     # Kronecker mvm. Note that eigenvec(A) = eigenvec(A^-1)
     a = kron_op(w_d, y, transA=True)
@@ -471,6 +478,7 @@ def log_likelihood_linear_normal(
     K: Optional[Union[int, float, np.ndarray]],
     std_meas: Optional[Union[int, float, np.ndarray]] = None,
     y_model: Optional[np.ndarray] = None,
+    jitter: Optional[Union[int, float]] = 1e-6,
 ) -> np.ndarray:
     """
     Gaussian log-likelihood function for the following models:
@@ -498,6 +506,8 @@ def log_likelihood_linear_normal(
         std_meas: [shape(y)] Std. dev. of the measurement uncertainty with
         y_model: [shape(y)] optional vector of model predictions in the case of
         multiplicative model prediction uncertainty.
+        jitter: Optional small scalar noise value to ensure numerical
+        stability in cases with no noise. Default = 1e-6.
 
     Returns:
         log_like: value of the log-likelihood evaluated at theta.
@@ -536,7 +546,9 @@ def log_likelihood_linear_normal(
                 torch.zeros(N), torch.tensor(K + np.diag(std_meas ** 2))
             )
         else:
-            dist = MultivariateNormal(torch.zeros(N), torch.tensor(K))
+            dist = MultivariateNormal(
+                torch.zeros(N), torch.tensor(K) + torch.ones(N) * jitter
+            )
 
     return dist.log_prob(y).sum().detach().cpu().numpy()
 
