@@ -235,12 +235,13 @@ def kron_loglike_2D_tridiag(
     y: np.ndarray,
     x: np.ndarray,
     t: np.ndarray,
-    std_meas: Union[int, float],
     l_corr_x: Union[int, float],
     std_x: Union[int, float],
     l_corr_t: Union[int, float],
     std_t: Union[int, float],
+    std_meas: Optional[Union[int, float]] = None,
     check_finite: Optional[bool] = False,
+    jitter: Optional[Union[int, float]] = 1e-6,
 ) -> float:
     """
     Efficient 2D loglikelihood using Kronecker properties.
@@ -289,7 +290,7 @@ def kron_loglike_2D_tridiag(
         # Kronecker prod of eigenvalues.
         C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + std_meas ** 2
     else:
-        C_xt = np.kron(1 / lambda_x, 1 / lambda_t)
+        C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + jitter
 
     # Determinant: C_xt is diagonal. We can therefore sum the log terms.
     # This is the determinant of the inverse.
@@ -310,8 +311,9 @@ def kron_loglike_2D(
     y: np.ndarray,
     Cx: Union[list, np.ndarray],
     Ct: Union[list, np.ndarray],
-    std_meas: Optional[Union[int, float]],
+    std_meas: Optional[Union[int, float]] = None,
     check_finite: Optional[bool] = False,
+    jitter: Optional[Union[int, float]] = 1e-6,
 ) -> float:
     """
     Efficient loglikelihood for Exponential temporal correlation.
@@ -342,7 +344,7 @@ def kron_loglike_2D(
     # the diagonal and off-diagonal vectors of a tridiagonal inverse correlation
     # matrix. Apply the corresponding eigendecomposition.
     if isinstance(Cx, list):
-        Nx = np.shape(Cx[0])
+        Nx = len(Cx[0])
         lambda_x, w_x = eigh_tridiagonal(Cx[0], Cx[1], check_finite=check_finite)
         lambda_x = 1 / lambda_x
     elif isinstance(Cx, np.ndarray):
@@ -356,7 +358,7 @@ def kron_loglike_2D(
         )
 
     if isinstance(Ct, list):
-        Nt = np.shape(Ct[0])
+        Nt = len(Ct[0])
         lambda_t, w_t = eigh_tridiagonal(Ct[0], Ct[1], check_finite=check_finite)
         lambda_t = 1 / lambda_t
     elif isinstance(Ct, np.ndarray):
@@ -377,7 +379,7 @@ def kron_loglike_2D(
         C_xt = np.kron(lambda_x, lambda_t) + std_meas ** 2
 
     else:
-        C_xt = np.kron(lambda_x, lambda_t)
+        C_xt = np.kron(lambda_x, lambda_t) + jitter
 
     # Determinant: C_xt is diagonal. We can therefore sum the log terms. This is the
     # determinant of the inverse.
@@ -399,8 +401,9 @@ def kron_loglike_ND_tridiag(
     x: List,
     std_model: Union[List, np.ndarray],
     l_corr_d: Union[List, np.ndarray],
-    std_meas: Optional[Union[int, float]],
+    std_meas: Optional[Union[int, float]] = None,
     check_finite: Optional[bool] = False,
+    jitter: Optional[Union[int, float]] = 1e-6,
 ) -> float:
     """
     Args:
@@ -448,8 +451,10 @@ def kron_loglike_ND_tridiag(
     if std_meas is not None:
         if not isinstance(std_meas, (int, float)):
             raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
-        C = C + std_meas ** 2
-    logdet_C = np.sum(np.log(C))
+        C += std_meas ** 2
+    else:
+        C += jitter
+        logdet_C = np.sum(np.log(C))
 
     # Kronecker mvm. Note that eigenvec(A) = eigenvec(A^-1)
     a = kron_op(w_d, y, transA=True)
