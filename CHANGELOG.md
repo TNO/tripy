@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2022-02-03)
+### Feature
+* Std_meas and y_model are now optional arguments wherever possible. Closes #4 ([`133c7a1`](https://gitlab.com/GKoune/tripy/-/commit/133c7a1a3cf602ad182c9e276f25601499abc6a2))
+* Implemented loglikelihood_linear_normal ([`1d006b9`](https://gitlab.com/GKoune/tripy/-/commit/1d006b9aa210b0e5ffe8cd7e4c5f0fc5f3869d8f))
+
+### Fix
+* Fixed error in logic of log_likelihood_linear_normal ([`65419f0`](https://gitlab.com/GKoune/tripy/-/commit/65419f0dd78fead4420f5c9ea146b9bc2abfd490))
+
 ## v0.5.0 (2022-02-02)
 ### Feature
 * Fixed loglikelihood.py and updated test_block_cholesky_loglikelihood_2D to account for change in call signature of chol_loglike_2D ([`4f15832`](https://gitlab.com/GKoune/tripy/-/commit/4f15832a8da902cd9b3ad8b349f9e50f7a5bfb10))
