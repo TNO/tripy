@@ -363,8 +363,15 @@ def kron_loglike_2D(
             "vectors of the inverse correlation matrix."
         )
 
-    # Kronecker prod of eigenvalues.
-    C_xt = np.kron(lambda_x, lambda_t) + std_meas ** 2
+    if std_meas is not None:
+        if not isinstance(std_meas, (int, float)):
+            raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
+
+        # Kronecker prod of eigenvalues.
+        C_xt = np.kron(lambda_x, lambda_t) + std_meas ** 2
+
+    else:
+        C_xt = np.kron(lambda_x, lambda_t)
 
     # Determinant: C_xt is diagonal. We can therefore sum the log terms. This is the
     # determinant of the inverse.
@@ -447,7 +454,7 @@ def kron_loglike_ND_tridiag(
 
 def log_likelihood_linear_normal(
     y: np.ndarray,
-    K: Union[int, float, np.ndarray],
+    K: Optional[Union[int, float, np.ndarray]],
     std_meas: Optional[Union[int, float, np.ndarray]] = None,
     y_model: Optional[np.ndarray] = None,
 ) -> np.ndarray:
@@ -459,7 +466,7 @@ def log_likelihood_linear_normal(
 
     where
         * ``K1`` ~ MVN(mean=1, covariance=k_cov_mx)
-        * ``K2`` ~ MVM(mean)
+        * ``K2`` ~ MVN(mean)
         * ``E`` ~ MVN(mean=0, covariance=e_cov_mx)
         * ``f`` is a physical model function parametrized by theta
 
@@ -484,20 +491,20 @@ def log_likelihood_linear_normal(
     # Cast noise std. dev. to array
     std_meas = _cast_scalar_to_array(std_meas, N)
 
-    k_cov_mx_zero_flag = False
+    # Check that model uncertainty covariance matrix is supplied if `y_model`
+    # is not None. Scale model uncertainty covariance by model prediction.
+    if y_model is not None:
+        if K is not None:
+            y_model_diag = np.diag(y_model.ravel())
+            kph_cov_mx = np.matmul(y_model_diag, np.matmul(K, y_model_diag))
+        else:
+            raise ValueError(
+                "Model uncertainty scaling vector is provided but `K` is None"
+            )
 
     if K is None:
         K = np.zeros((N, N))
         kph_cov_mx = K
-        k_cov_mx_zero_flag = True
-
-    # Calculate likelihood value
-    if y_model is not None:
-        y_model_diag = np.diag(y_model.ravel())
-
-    # covariance matrix of K*physical_model(theta)
-    if not k_cov_mx_zero_flag:
-        kph_cov_mx = np.matmul(y_model_diag, np.matmul(K, y_model_diag))
 
     mvn = MultivariateNormal(
         torch.zeros(N), torch.tensor(kph_cov_mx + np.diag(std_meas ** 2))
