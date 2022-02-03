@@ -9,6 +9,7 @@ import torch
 from scipy.linalg import eigh, eigh_tridiagonal
 from scipy.linalg.lapack import dpotrf
 from torch.distributions import MultivariateNormal
+from torch.distributions.normal import Normal
 
 from tripy.utils import (
     _cast_scalar_to_array,
@@ -391,9 +392,9 @@ def kron_loglike_2D(
 def kron_loglike_ND_tridiag(
     y: np.ndarray,
     x: List,
-    std_meas: Union[int, float],
     std_model: Union[List, np.ndarray],
     l_corr_d: Union[List, np.ndarray],
+    std_meas: Optional[Union[int, float]],
     check_finite: Optional[bool] = False,
 ) -> float:
     """
@@ -439,7 +440,10 @@ def kron_loglike_ND_tridiag(
         w_d.append(w_i)
 
     # Add noise and calculate determinant
-    C = C + std_meas ** 2
+    if std_meas is not None:
+        if not isinstance(std_meas, (int, float)):
+            raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
+        C = C + std_meas ** 2
     logdet_C = np.sum(np.log(C))
 
     # Kronecker mvm. Note that eigenvec(A) = eigenvec(A^-1)
@@ -470,13 +474,19 @@ def log_likelihood_linear_normal(
         * ``E`` ~ MVN(mean=0, covariance=e_cov_mx)
         * ``f`` is a physical model function parametrized by theta
 
+    Notes:
+        * If K is None, the loglikelihood is calculated as the sum of N
+        independent normally distributed random variables
+
+    TODO:
+        * The logic in this function works but can probably be improved.
 
     Args:
         y: [N_1, N_2, ... Ni, ... N_d] Array of observations or residuals
         between measurements and model predictions.
         K: covariance matrix of `K`, shape [prod(Ni), prod(Ni)].
-        std_meas: Std. dev. of the measurement uncertainty.
-        y_model: [Nx, Nt] optional vector of model predictions in the case of
+        std_meas: [shape(y)] Std. dev. of the measurement uncertainty with
+        y_model: [shape(y)] optional vector of model predictions in the case of
         multiplicative model prediction uncertainty.
 
     Returns:
@@ -488,29 +498,33 @@ def log_likelihood_linear_normal(
     N = y.size
     y = torch.tensor(y)
 
-    # Cast noise std. dev. to array
-    std_meas = _cast_scalar_to_array(std_meas, N)
-
     # Check that model uncertainty covariance matrix is supplied if `y_model`
     # is not None. Scale model uncertainty covariance by model prediction.
     if y_model is not None:
         if K is not None:
             y_model_diag = np.diag(y_model.ravel())
-            kph_cov_mx = np.matmul(y_model_diag, np.matmul(K, y_model_diag))
+            K = np.matmul(y_model_diag, np.matmul(K, y_model_diag))
         else:
             raise ValueError(
                 "Model uncertainty scaling vector is provided but `K` is None"
             )
 
     if K is None:
-        K = np.zeros((N, N))
-        kph_cov_mx = K
+        if std_meas is not None:
+            std_meas = _cast_scalar_to_array(std_meas, N).ravel()
+            dist = Normal(torch.zeros(N), torch.tensor(std_meas))
+        else:
+            raise ValueError("At least one of `K`, `std_meas` expected to be not None")
+    else:
+        if std_meas is not None:
+            std_meas = _cast_scalar_to_array(std_meas, N).ravel()
+            dist = MultivariateNormal(
+                torch.zeros(N), torch.tensor(K + np.diag(std_meas ** 2))
+            )
+        else:
+            dist = MultivariateNormal(torch.zeros(N), torch.tensor(K))
 
-    mvn = MultivariateNormal(
-        torch.zeros(N), torch.tensor(kph_cov_mx + np.diag(std_meas ** 2))
-    )
-
-    return mvn.log_prob(y).detach().cpu().numpy()
+    return dist.log_prob(y).sum().detach().cpu().numpy()
 
 
 def log_likelihood_reference(
