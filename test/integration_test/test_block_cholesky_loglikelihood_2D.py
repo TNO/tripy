@@ -164,6 +164,3 @@ def test_block_cholesky_loglikelihood():
 
     assert np.allclose(loglike_chol, loglike_linear_normal)
     assert np.allclose(loglike_chol, loglike_ref)
-
-
-test_block_cholesky_loglikelihood()

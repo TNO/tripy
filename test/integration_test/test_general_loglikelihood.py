@@ -350,8 +350,3 @@ def test_log_likelihood_linear_normal_additive_no_noise():
 #     print(logL_ref)
 #     print(logL_chol)
 #     assert np.allclose(logL_ref, logL_chol)
-
-test_log_likelihood_linear_normal_multiplicative()
-test_log_likelihood_linear_normal_multiplicative_no_noise()
-test_log_likelihood_linear_normal_additive()
-test_log_likelihood_linear_normal_additive_no_noise()

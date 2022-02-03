@@ -303,10 +303,3 @@ def test_kron_loglike_ND_general():
     Test the `kron_loglike_ND` function in the case where all
     dimensions are tridiagonal
     """
-
-
-test_kron_loglike_2D_tridiagonal()
-test_kron_loglike_2D_mixed_1()
-test_kron_loglike_2D_mixed_2()
-test_kron_loglike_2D_general()
-test_kron_loglike_ND_tridiagonal()
