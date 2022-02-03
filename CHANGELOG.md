@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.3 (2022-02-03)
+### Fix
+* Added underscore to name of kron_loglike_ND_tridiag ([`3f5442f`](https://gitlab.com/GKoune/tripy/-/commit/3f5442f9d36bb6d2e15b7d7106842efbf6cc7301))
+
 ## v0.7.2 (2022-02-03)
 ### Feature
 * Option to add jitter to the covariance matrix when std_meas is zero ([`170d450`](https://gitlab.com/GKoune/tripy/-/commit/170d450c9cdd009bfe85d9f3247a1ce91c11760f))
