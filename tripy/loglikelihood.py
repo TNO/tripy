@@ -282,12 +282,17 @@ def kron_loglike_2D_tridiag(
     lambda_t, w_t = eigh_tridiagonal(Ct_0, Ct_1, check_finite=check_finite)
     lambda_x, w_x = eigh_tridiagonal(Cx_0, Cx_1, check_finite=check_finite)
 
-    # Kronecker prod of eigenvalues. This is the main diagonal of the diagonal
-    # covariance matrix
-    C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + std_meas ** 2
+    # Kronecker prod of eigenvalues.
+    if std_meas is not None:
+        if not isinstance(std_meas, (int, float)):
+            raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
+        # Kronecker prod of eigenvalues.
+        C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + std_meas ** 2
+    else:
+        C_xt = np.kron(1 / lambda_x, 1 / lambda_t)
 
-    # Determinant: C_xt is diagonal. We can therefore sum the log terms. This is the
-    # determinant of the inverse.
+    # Determinant: C_xt is diagonal. We can therefore sum the log terms.
+    # This is the determinant of the inverse.
     logdet_C_xt = np.sum(np.log(C_xt))
 
     # Rotated data vector.
@@ -509,12 +514,16 @@ def log_likelihood_linear_normal(
                 "Model uncertainty scaling vector is provided but `K` is None"
             )
 
+    # If K is not supplied, then the loglikelihood can be evaluated as the
+    # sum of loglikelihoods of independent normally distributed random vars
     if K is None:
         if std_meas is not None:
             std_meas = _cast_scalar_to_array(std_meas, N).ravel()
             dist = Normal(torch.zeros(N), torch.tensor(std_meas))
         else:
             raise ValueError("At least one of `K`, `std_meas` expected to be not None")
+
+    # Multivariate normal case
     else:
         if std_meas is not None:
             std_meas = _cast_scalar_to_array(std_meas, N).ravel()
