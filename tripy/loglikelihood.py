@@ -400,7 +400,7 @@ def kron_loglike_2D(
     )
 
 
-def kron_loglike_ND_tridiag(
+def _kron_loglike_ND_tridiag(
     y: np.ndarray,
     x: List,
     std_model: Union[List, np.ndarray],
