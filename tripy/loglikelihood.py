@@ -7,7 +7,7 @@ from typing import Callable, List, Optional, Union
 import numpy as np
 import torch
 from scipy.linalg import eigh, eigh_tridiagonal
-from scipy.linalg.lapack import dpotrf
+from scipy.linalg.lapack import dpotrf, dpotrs
 from torch.distributions import MultivariateNormal
 from torch.distributions.normal import Normal
 
@@ -471,6 +471,46 @@ def _kron_loglike_ND_tridiag(
 
     # Loglikelihood
     return -0.5 * np.prod(Nd) * np.log(2 * np.pi) - 0.5 * logdet_C - 0.5 * ySy
+
+
+def _loglike_normal(y, std):
+    """
+
+    Args:
+        y:
+        std:
+
+    Returns:
+
+    """
+
+    return -0.5 * (y / std) ** 2 - np.log(std * np.sqrt(2 * np.pi))
+
+
+def _loglike_multivariate_normal(y, cov):
+    """
+    Calculate the multivariate normal loglikelihood
+
+    Args:
+        y:
+        cov:
+
+    Returns:
+
+    """
+    N = y.size
+
+    # Lower Cholesky factor
+    L = np.linalg.cholesky(cov)
+
+    # Solve factorized system
+    x = dpotrs(L, y, lower=True, overwrite_b=False)
+    ySy = np.sum(y * x)
+
+    # Logdeterminant
+    logdet = np.sum(2 * np.log(np.diag(L)))
+
+    return -0.5 * (logdet + ySy + N * np.log(2 * np.pi))
 
 
 def log_likelihood_linear_normal(
