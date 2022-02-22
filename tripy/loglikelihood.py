@@ -501,7 +501,7 @@ def _loglike_multivariate_normal(y, cov):
     L = np.linalg.cholesky(cov)
 
     # Solve factorized system
-    x = dpotrs(L, y, lower=True, overwrite_b=False)
+    x, info = dpotrs(L, y, lower=True, overwrite_b=False)
     ySy = np.sum(y * x)
 
     # Logdeterminant

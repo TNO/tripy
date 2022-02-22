@@ -4,14 +4,13 @@ Testing for the ND Cholesky loglikelihood with vector noise and associated funct
     * symm_tri_block_chol: Block Cholesky decomposition of block symmetric
     tridiagonal matrices
 """
-
 # ============================================================================
 # Imports
 # ============================================================================
 import numpy as np
-from _utilities import log_likelihood_reference
 from scipy.stats import multivariate_normal
 
+from test.integration_test._test_utils import log_likelihood_reference
 from tripy.kernels import Exponential
 from tripy.loglikelihood import chol_loglike_2D
 from tripy.utils import inv_cov_vec_1D
