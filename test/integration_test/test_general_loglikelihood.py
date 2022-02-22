@@ -4,10 +4,12 @@ Testing the proposed efficient loglikelihood evaluation in the 1D case.
 """
 
 import numpy as np
+from _utilities import log_likelihood_reference
 from scipy import stats
 
 from tripy.kernels import Exponential
-from tripy.loglikelihood import log_likelihood_linear_normal, log_likelihood_reference
+from tripy.loglikelihood import log_likelihood_linear_normal
+
 
 jitter = 1e-16
 

@@ -16,7 +16,6 @@ user_requires = [
     "tabulate<1",
     "tqdm<5",
     "numba<1",
-    "torch<2",
 ]
 doc_requires = [
     "six",
@@ -32,6 +31,7 @@ doc_requires = [
 test_requires = [
     "pytest",
     "coverage",
+    "torch<2",
 ]
 packaging_requires = [
     "twine",

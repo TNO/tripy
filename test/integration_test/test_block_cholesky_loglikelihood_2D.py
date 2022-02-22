@@ -9,10 +9,11 @@ Testing for the ND Cholesky loglikelihood with vector noise and associated funct
 # Imports
 # ============================================================================
 import numpy as np
+from _utilities import log_likelihood_reference
 from scipy.stats import multivariate_normal
 
 from tripy.kernels import Exponential
-from tripy.loglikelihood import chol_loglike_2D, log_likelihood_reference
+from tripy.loglikelihood import chol_loglike_2D
 from tripy.utils import inv_cov_vec_1D
 
 
