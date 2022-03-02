@@ -142,13 +142,13 @@ for i, p in enumerate(p_vec):
     v_obs = np.random.rand(N) + y_func
 
     # Initial evaluation to perform jit compilation using numba.
-    _ = chol_loglike_1D(t, v_obs, l_corr, std_model, std_meas=std_meas, y_model=y_func)
+    _ = chol_loglike_1D(v_obs, t, l_corr, std_model, std_meas=std_meas, y_model=y_func)
 
     # Call function
     t1 = timer()
     for _j in range(N_iter):
         test = chol_loglike_1D(
-            t, v_obs, l_corr, std_model, std_meas=std_meas, y_model=y_func
+            v_obs, t, l_corr, std_model, std_meas=std_meas, y_model=y_func
         )
     t2 = timer()
 
