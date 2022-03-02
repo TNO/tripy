@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.0 (2022-03-02)
+### Feature
+* General normal and multivariate normal loglikelihood ([`fa75102`](https://gitlab.com/GKoune/tripy/-/commit/fa75102d50a9ed17cbe24bb0c72f167bb875cda2))
+
+### Fix
+* Correct output shape for dpotrs in _loglike_multivariate_normal ([`3f80dee`](https://gitlab.com/GKoune/tripy/-/commit/3f80dee091e1f37f782d404f9e1fb10531670dbb))
+
+### Documentation
+* Fixed 1D cholesky example. Closes #8 ([`39681eb`](https://gitlab.com/GKoune/tripy/-/commit/39681eb1df0678d44cff49aa259b770a059a6d67))
+
 ## v0.7.3 (2022-02-03)
 ### Fix
 * Added underscore to name of kron_loglike_ND_tridiag ([`3f5442f`](https://gitlab.com/GKoune/tripy/-/commit/3f5442f9d36bb6d2e15b7d7106842efbf6cc7301))
