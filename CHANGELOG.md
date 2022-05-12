@@ -2,6 +2,9 @@
 
 <!--next-version-placeholder-->
 
+## v0.8.1 (2022-05-12)
+
+
 ## v0.8.0 (2022-03-02)
 ### Feature
 * General normal and multivariate normal loglikelihood ([`fa75102`](https://gitlab.com/GKoune/tripy/-/commit/fa75102d50a9ed17cbe24bb0c72f167bb875cda2))
