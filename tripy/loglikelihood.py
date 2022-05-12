@@ -84,9 +84,9 @@ def chol_loglike_1D(
         d0, d1 = inv_cov_vec_1D(x, l_corr, std_model)
 
         # Assemble terms of Eqs 50 - 52
-        W = 1 / (np.ones(Nx) * std_meas ** 2)  # Inverse noise vector
-        yWy = np.sum(y ** 2 * (1 / std_meas ** 2))  # Obtained from Woodbury id
-        GWG = y_model ** 2 * (1 / std_meas ** 2)
+        W = 1 / (np.ones(Nx) * std_meas**2)  # Inverse noise vector
+        yWy = np.sum(y**2 * (1 / std_meas**2))  # Obtained from Woodbury id
+        GWG = y_model**2 * (1 / std_meas**2)
         Wyx = W * y_model * y
         d0_yWy = d0 + GWG
 
@@ -193,16 +193,16 @@ def chol_loglike_2D(
 
     # Set y_model to vector of ones if None is specified
     if y_model is None:
-        y_model = np.ones(Nx, Nt)
+        y_model = np.ones((Nx, Nt))
 
-    L, C = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y_model)
+    L, C = symm_tri_block_chol(Cx, Ct, std_meas**2, y=y_model)
 
     # Get diagonal elements of L
     Ldiag = np.diagonal(L, axis1=1, axis2=2)
 
     # Vectors to be used later
-    Winv_vec = 1 / std_meas ** 2
-    yWy = np.sum(y ** 2 * (1 / std_meas ** 2))
+    Winv_vec = 1 / std_meas**2
+    yWy = np.sum(y**2 * (1 / std_meas**2))
     WGx = Winv_vec * y_model * y
 
     # Solve the linear system
@@ -287,7 +287,7 @@ def kron_loglike_2D_tridiag(
         if not isinstance(std_meas, (int, float)):
             raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
         # Kronecker prod of eigenvalues.
-        C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + std_meas ** 2
+        C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + std_meas**2
     else:
         C_xt = np.kron(1 / lambda_x, 1 / lambda_t) + jitter
 
@@ -302,7 +302,7 @@ def kron_loglike_2D_tridiag(
     return (
         -Nx * Nt / 2 * np.log(2 * np.pi)
         - 0.5 * logdet_C_xt
-        - 0.5 * np.sum(Y ** 2 * 1 / C_xt)
+        - 0.5 * np.sum(Y**2 * 1 / C_xt)
     )
 
 
@@ -377,7 +377,7 @@ def kron_loglike_2D(
             raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
 
         # Kronecker prod of eigenvalues.
-        C_xt = np.kron(lambda_x, lambda_t) + std_meas ** 2
+        C_xt = np.kron(lambda_x, lambda_t) + std_meas**2
 
     else:
         C_xt = np.kron(lambda_x, lambda_t) + jitter
@@ -393,7 +393,7 @@ def kron_loglike_2D(
     return (
         -Nx * Nt / 2 * np.log(2 * np.pi)
         - 0.5 * logdet_C_xt
-        - 0.5 * np.sum(Y ** 2 * 1 / C_xt)
+        - 0.5 * np.sum(Y**2 * 1 / C_xt)
     )
 
 
@@ -455,9 +455,9 @@ def _kron_loglike_ND_tridiag(
     if std_meas is not None:
         if not isinstance(std_meas, (int, float)):
             raise ValueError(f"`std_meas` must be {int}, {float} or {None}.")
-        C += std_meas ** 2
+        C += std_meas**2
     else:
-        C += jitter ** 2
+        C += jitter**2
     logdet_C = np.sum(np.log(C))
 
     # Kronecker mvm. Note that eigenvec(A) = eigenvec(A^-1)
@@ -578,6 +578,6 @@ def log_likelihood_linear_normal(
     else:
         if std_meas is not None:
             std_meas = _cast_scalar_to_array(std_meas, N).ravel()
-            return _loglike_multivariate_normal(y, K + np.diag(std_meas ** 2))
+            return _loglike_multivariate_normal(y, K + np.diag(std_meas**2))
         else:
             return _loglike_multivariate_normal(y, K + np.ones(N) * jitter)
