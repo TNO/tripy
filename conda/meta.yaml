@@ -1,3 +1,6 @@
+# NOTE: This file is excluded from the `check-yaml` pre-commit hood
+# because the first two statements cause errors. FIX!
+
 {% set name = "tri-py" %}
 {% set version = "0.8.1" %}
 
