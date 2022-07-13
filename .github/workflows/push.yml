@@ -47,7 +47,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install package with dependencies
         run: |
-          pip install .[tests]
+          pip install .[testing]
       - name: Test with pytest
         run: |
           # grab the coverage output and also print it to the sreen
@@ -84,8 +84,8 @@ jobs:
         uses: schneegans/dynamic-badges-action@v1.1.0
         with:
           auth: ${{ secrets.GIST_SECRET }}
-          gistID: 812e7f877bc9e67a4b692669ddc71030
-          filename: harlow_${{ env.BRANCH_NAME }}_coverage.json
+          gistID: 08985bf02bfbea845659e2a487ba86d5
+          filename: tripy_${{ env.BRANCH_NAME }}_coverage.json
           label: coverage
           message: ${{ env.COVERAGE_PCT }}
           color: ${{ env.COVERAGE_COL }}
