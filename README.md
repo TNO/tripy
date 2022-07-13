@@ -4,6 +4,7 @@
 [![CI](https://github.com/TNO/tripy/actions/workflows/push.yml/badge.svg)](https://github.com/TNO/tripy/actions)
 [![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/JanKoune/08985bf02bfbea845659e2a487ba86d5/raw/tripy_master_coverage.json)](https://en.wikipedia.org/wiki/Code_coverage)
 [![PyPI version](https://img.shields.io/pypi/v/tri-py)](https://pypi.org/project/tri-py/)
+[![Conda version](https://anaconda.org/GKoune/tri-py/badges/version.sv)](https://anaconda.org/GKoune/tri-py)
 ![python versions](https://img.shields.io/pypi/pyversions/tri-py)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
