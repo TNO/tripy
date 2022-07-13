@@ -46,7 +46,7 @@ def test_log_likelihood_linear_normal_multiplicative():
     y_res = y_obs - y_model
 
     # Assemble the covariance matrix for the reference solution
-    e_cov_mx = np.diag(np.ones(N) * std_meas ** 2)
+    e_cov_mx = np.diag(np.ones(N) * std_meas**2)
     kernel = Exponential(np.reshape(x, (-1, 1)), np.ones(N), length_scale=lcorr)
     k_cov_mx = kernel.eval(std_model, length_scale=lcorr)
     kph_cov_mx = np.matmul(np.diag(y_model), np.matmul(k_cov_mx, np.diag(y_model)))
@@ -156,7 +156,7 @@ def test_log_likelihood_linear_normal_additive():
     y_res = y_obs - y_model
 
     # Assemble the covariance matrix for the reference solution
-    e_cov_mx = np.diag(np.ones(N) * std_meas ** 2)
+    e_cov_mx = np.diag(np.ones(N) * std_meas**2)
     kernel = Exponential(np.reshape(x, (-1, 1)), np.ones(N), length_scale=lcorr)
     k_cov_mx = kernel.eval(std_model, length_scale=lcorr)
     cov_mx = k_cov_mx + e_cov_mx

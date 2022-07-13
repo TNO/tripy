@@ -43,8 +43,8 @@ def test_MeasurementSpaceTimePoints():
             load
             * b
             * d
-            / (6 * 10 ** 9 * span * elastic_mod * inertia)
-            * (span ** 2 - b ** 2 - d ** 2)
+            / (6 * 10**9 * span * elastic_mod * inertia)
+            * (span**2 - b**2 - d**2)
         )
         return x_predicted
 

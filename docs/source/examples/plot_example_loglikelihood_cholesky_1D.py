@@ -73,7 +73,7 @@ v_obs = np.random.rand(N) + y_func
 # %%
 # Reference solution using scipy:
 
-e_cov_mx = np.diag(std_meas ** 2)
+e_cov_mx = np.diag(std_meas**2)
 kernel = Exponential(np.reshape(t, (-1, 1)))
 corr_mx = kernel.eval(std_model, length_scale=l_corr)
 kph_cov_mx = np.matmul(np.diag(y_func), np.matmul(corr_mx, np.diag(y_func)))
@@ -103,7 +103,7 @@ for i, N in enumerate(N_vec):
     # Observations
     v_obs = np.random.rand(N) + y_func
 
-    e_cov_mx = np.diag(std_meas ** 2)
+    e_cov_mx = np.diag(std_meas**2)
     kernel = Exponential(np.reshape(t, (-1, 1)))
 
     # Reference
@@ -128,7 +128,7 @@ p_vec = np.linspace(2, 6, 50)
 t_list = []
 for i, p in enumerate(p_vec):
 
-    N = int(10 ** p)
+    N = int(10**p)
 
     # Vectors of measurement and modeling uncertainty std. dev.
     std_meas = np.repeat(2.0, N)
@@ -164,7 +164,7 @@ for i, p in enumerate(p_vec):
 # Plot a comparison of the wall clock times:
 
 fig = plt.figure()
-plt.plot([int(10 ** p) for p in p_vec], t_list, label="Efficient evaluation")
+plt.plot([int(10**p) for p in p_vec], t_list, label="Efficient evaluation")
 plt.plot(N_vec, t_ref_list, label="Naive evaluation")
 plt.xlabel("No. of points")
 plt.ylabel("Wall clock time [s]")
