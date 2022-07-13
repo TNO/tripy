@@ -1,4 +1,9 @@
 # tripy
+
+[![CI](https://github.com/JanKoune/tripy/actions/workflows/push.yml/badge.svg)](https://github.com/JanKoune/tripy/actions)
+[![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/JanKoune/812e7f877bc9e67a4b692669ddc71030/raw/tripy_master_coverage.json)](https://en.wikipedia.org/wiki/Code_coverage)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 A package for efficient[^1] likelihood evaluation and sampling for Multivariate Normal distributions where the covariance matrix:
 
 * Is Separable, i.e. can be expressed as the [Kronecker product](https://en.wikipedia.org/wiki/Kronecker_product) of the covariance over different dimensions (e.g. space and time);
