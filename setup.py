@@ -6,13 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 # Package requirements
-user_requires = [
-    "numpy<2",
-    "scipy<2",
-    "tabulate<1",
-    "tqdm<5",
-    "numba<1",
-]
+user_requires = ["numpy<2", "scipy<2", "tabulate<1", "tqdm<5", "numba<1", "matplotlib"]
 doc_requires = [
     "six",
     "sphinx<5",

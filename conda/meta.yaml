@@ -30,6 +30,7 @@ requirements:
     - tabulate<1
     - tqdm<5
     - numba<1
+    - matplotlib
 
 about:
   home: https://github.com/TNO/tripy

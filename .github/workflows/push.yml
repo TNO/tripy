@@ -47,7 +47,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install package with dependencies
         run: |
-          pip install .[tests]
+          pip install .[testing]
       - name: Test with pytest
         run: |
           # grab the coverage output and also print it to the sreen
