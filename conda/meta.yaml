@@ -1,0 +1,45 @@
+# NOTE: This file is excluded from the `check-yaml` pre-commit hood
+# because the first two statements cause errors. FIX!
+
+{% set name = "tri-py" %}
+{% set version = "0.8.1" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  sha256: 8b959ab918188bbf2eb1512101789fa9d72ad9f16862cd2bb1f26027716eca58
+
+build:
+  noarch: python
+  number: 1
+  script: {{ PYTHON }} -m pip install --no-deps --ignore-installed .
+
+requirements:
+  host:
+    - python
+    - setuptools
+  build:
+    - python
+  run:
+    - python
+    - numpy<2
+    - scipy<2
+    - tabulate<1
+    - tqdm<5
+    - numba<1
+
+about:
+  home: https://github.com/TNO/tripy
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE
+  summary: "A package for efficient likelihood evaluation and sampling for Multivariate Normal distributions with structured covariance matrices"
+  dev_url: https://github.com/TNO/tripy
+  doc_url: https://tripy.readthedocs.io/en/latest/
+
+extra:
+  recipe-maintainers:
+    - Ioannis Koune

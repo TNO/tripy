@@ -77,10 +77,10 @@ def test_block_cholesky_decomposition():
     Cx = [Cx_0, Cx_1]
     Ct = [Ct_0, Ct_1]
     y = np.ones((Nx, Nt))
-    GWG = y ** 2 * (1 / std_meas ** 2)
+    GWG = y**2 * (1 / std_meas**2)
     cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
-    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
+    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas**2, y=y)
     L_ref = np.linalg.cholesky(cov_mx_ref)
 
     # Check diagonal blocks
@@ -98,11 +98,11 @@ def test_block_cholesky_decomposition():
     Cx = [Cx_0, Cx_1]
     Ct = [Ct_0, Ct_1]
     y = np.random.rand(Nx, Nt) * 0.1
-    GWG = y ** 2 * (1 / std_meas ** 2)
+    GWG = y**2 * (1 / std_meas**2)
     cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     # Without scaling vector
-    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
+    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas**2, y=y)
     L_ref = np.linalg.cholesky(cov_mx_ref)
 
     # Check diagonal blocks
@@ -124,11 +124,11 @@ def test_block_cholesky_decomposition():
     Cx = inv_cov_mx_x
     Ct = [Ct_0, Ct_1]
     y = np.ones((Nx, Nt))
-    GWG = y ** 2 * (1 / std_meas ** 2)
+    GWG = y**2 * (1 / std_meas**2)
     cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     # Without scaling vector
-    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
+    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas**2, y=y)
     L_ref = np.linalg.cholesky(cov_mx_ref)
 
     # Check diagonal blocks
@@ -146,11 +146,11 @@ def test_block_cholesky_decomposition():
     Cx = inv_cov_mx_x
     Ct = [Ct_0, Ct_1]
     y = np.random.rand(Nx, Nt) * 0.1
-    GWG = y ** 2 * (1 / std_meas ** 2)
+    GWG = y**2 * (1 / std_meas**2)
     cov_mx_ref = np.kron(inv_cov_mx_t, inv_cov_mx_x) + np.diag(GWG.T.ravel())
 
     # Without scaling vector
-    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas ** 2, y=y)
+    L_test, C_test = symm_tri_block_chol(Cx, Ct, std_meas**2, y=y)
     L_ref = np.linalg.cholesky(cov_mx_ref)
 
     # Check diagonal blocks

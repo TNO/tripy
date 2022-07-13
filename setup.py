@@ -9,10 +9,6 @@ with open("README.md", "r", encoding="utf-8") as fh:
 user_requires = [
     "numpy<2",
     "scipy<2",
-    "nestle<1",
-    "emcee<4",
-    "dynesty<2",
-    "matplotlib<4",
     "tabulate<1",
     "tqdm<5",
     "numba<1",

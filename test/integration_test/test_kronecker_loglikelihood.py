@@ -45,7 +45,7 @@ def test_kron_loglike_2D_tridiagonal():
     cov_mx_x = kernel_x.eval(np.ones(Nx))
     cov_mx_t = kernel_t.eval(std_t)
     k_cov_mx = np.kron(cov_mx_x, cov_mx_t)
-    e_cov_mx = np.diag(np.repeat(std_meas ** 2, Nx * Nt))
+    e_cov_mx = np.diag(np.repeat(std_meas**2, Nx * Nt))
 
     Ct_0, Ct_1 = inv_cov_vec_1D(t, lcorr_t, std_t)
     Cx_0, Cx_1 = inv_cov_vec_1D(x, lcorr_x, np.ones(Nx))
@@ -104,7 +104,7 @@ def test_kron_loglike_2D_mixed_1():
     cov_mx_x = kernel_x.eval(np.ones(Nx))
     cov_mx_t = kernel_t.eval(std_t)
     k_cov_mx = np.kron(cov_mx_x, cov_mx_t)
-    e_cov_mx = np.diag(np.repeat(std_meas ** 2, Nx * Nt))
+    e_cov_mx = np.diag(np.repeat(std_meas**2, Nx * Nt))
 
     Ct_0, Ct_1 = inv_cov_vec_1D(t, lcorr_t, std_t)
 
@@ -162,7 +162,7 @@ def test_kron_loglike_2D_mixed_2():
     cov_mx_x = kernel_x.eval(std_x)
     cov_mx_t = kernel_t.eval(np.ones(Nt))
     k_cov_mx = np.kron(cov_mx_x, cov_mx_t)
-    e_cov_mx = np.diag(np.repeat(std_meas ** 2, Nx * Nt))
+    e_cov_mx = np.diag(np.repeat(std_meas**2, Nx * Nt))
 
     Cx_0, Cx_1 = inv_cov_vec_1D(x, lcorr_x, std_x)
 
@@ -217,7 +217,7 @@ def test_kron_loglike_2D_general():
     cov_mx_x = kernel_x.eval(np.ones(Nx))
     cov_mx_t = kernel_t.eval(std_t)
     k_cov_mx = np.kron(cov_mx_x, cov_mx_t)
-    e_cov_mx = np.diag(np.repeat(std_meas ** 2, Nx * Nt))
+    e_cov_mx = np.diag(np.repeat(std_meas**2, Nx * Nt))
 
     # Model and measurements
     y_model = np.random.rand(Nx, Nt) + 5.0
@@ -276,8 +276,8 @@ def test_kron_loglike_ND_tridiagonal():
     k_cov_mx = np.kron(k_cov_mx_list[1], k_cov_mx_list[0])
     for i in range(2, ND):
         k_cov_mx = np.kron(k_cov_mx_list[i], k_cov_mx)
-    cov_mx = k_cov_mx + np.diag(np.repeat(std_meas ** 2, N))
-    cov_mx_jit = k_cov_mx + np.diag(np.repeat(jitter ** 2, N))
+    cov_mx = k_cov_mx + np.diag(np.repeat(std_meas**2, N))
+    cov_mx_jit = k_cov_mx + np.diag(np.repeat(jitter**2, N))
 
     # Array of observations
     y = 10 * np.random.rand(N)

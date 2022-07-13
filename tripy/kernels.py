@@ -162,7 +162,7 @@ class RationalQuadratic(kernel):
 
     def _corr_mx(self):
         return (
-            1 + self.dist ** 2 / (2 * self.alpha * self.length_scale ** 2)
+            1 + self.dist**2 / (2 * self.alpha * self.length_scale**2)
         ) ** -self.alpha
 
     def _evaluate(self, **params):
@@ -199,7 +199,7 @@ class RBF(kernel):
         self.length_scale = params["length_scale"]
 
     def _corr_mx(self):
-        return np.exp(-self.dist ** 2 / (2 * self.length_scale ** 2))
+        return np.exp(-self.dist**2 / (2 * self.length_scale**2))
 
     def _evaluate(self, **params):
         return np.matmul(np.matmul(self.std_diag, self.corr(**params)), self.std_diag)
@@ -225,15 +225,15 @@ class Matern(kernel):
             K = (1.0 + K) * np.exp(-K)
         elif self.nu == 2.5:
             K = dists * math.sqrt(5)
-            K = (1.0 + K + K ** 2 / 3.0) * np.exp(-K)
+            K = (1.0 + K + K**2 / 3.0) * np.exp(-K)
         elif self.nu == np.inf:
-            K = np.exp(-(dists ** 2) / 2.0)
+            K = np.exp(-(dists**2) / 2.0)
         else:  # general case; expensive to evaluate
             K = dists
             K[K == 0.0] += np.finfo(float).eps  # strict zeros result in nan
             tmp = math.sqrt(2 * self.nu) * K
             K.fill((2 ** (1.0 - self.nu)) / gamma(self.nu))
-            K *= tmp ** self.nu
+            K *= tmp**self.nu
             K *= kv(self.nu, tmp)
         return K
 

@@ -142,7 +142,7 @@ def symm_tri_block_chol(Cx, Ct, vec_diag, y=None):
         y = np.ones((Nx, Nt))
 
     # Product of noise and model output matrices
-    GWG = y.T ** 2 / vec_diag.T
+    GWG = y.T**2 / vec_diag.T
 
     # Cholesky of space covariance matrix
     Li = dpotrf(Dd0 * Ct[0][0] + np.diag(GWG[0]), lower=1, clean=1, overwrite_a=0)[0]
@@ -277,7 +277,7 @@ def inv_cov_vec_1D(
     C_0[0] = a11
     C_0[1:-1] = aii
     C_0[-1] = ann
-    C_1 = (-a / (1 - a ** 2)) / (std[:-1] * std[1:])
+    C_1 = (-a / (1 - a**2)) / (std[:-1] * std[1:])
 
     return C_0, C_1
 

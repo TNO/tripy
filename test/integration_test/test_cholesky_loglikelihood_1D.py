@@ -46,7 +46,7 @@ def test_chol_loglike_1D_multiplicative():
     # ============================================================================
 
     # Assemble the covariance matrix for the reference solution
-    e_cov_mx = np.diag(np.ones(N) * std_meas ** 2)
+    e_cov_mx = np.diag(np.ones(N) * std_meas**2)
     kernel = Exponential(np.reshape(x, (-1, 1)), np.ones(N), length_scale=lcorr)
     corr_mx = kernel.eval(std_model, length_scale=lcorr)
     kph_cov_mx = np.matmul(np.diag(y_model), np.matmul(corr_mx, np.diag(y_model)))
@@ -95,7 +95,7 @@ def test_chol_loglike_1D_additive():
     # ============================================================================
 
     # Assemble the covariance matrix for the reference solution
-    e_cov_mx = np.diag(np.ones(N) * std_meas ** 2)
+    e_cov_mx = np.diag(np.ones(N) * std_meas**2)
     kernel = Exponential(np.reshape(x, (-1, 1)), np.ones(N), length_scale=lcorr)
     corr_mx = kernel.eval(std_model, length_scale=lcorr)
     cov_mx = corr_mx + e_cov_mx
