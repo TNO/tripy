@@ -1,6 +1,6 @@
 # tripy
 
-[![Documentation Status](https://readthedocs.org/projects/lightkde/badge/?version=stable)](https://lightkde.readthedocs.io/en/stable/)
+[![Documentation Status](https://readthedocs.org/projects/tripy/badge/?version=stable)](https://tripy.readthedocs.io/en/latest/)
 [![CI](https://github.com/TNO/tripy/actions/workflows/push.yml/badge.svg)](https://github.com/TNO/tripy/actions)
 [![Coverage Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/JanKoune/08985bf02bfbea845659e2a487ba86d5/raw/tripy_master_coverage.json)](https://en.wikipedia.org/wiki/Code_coverage)
 [![PyPI version](https://img.shields.io/pypi/v/tri-py)](https://pypi.org/project/tri-py/)
